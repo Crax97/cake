@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.00)
-project(Theather CXX)
+project(spectacle CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 set(CMAKE_CXX_STANDARD 20)
