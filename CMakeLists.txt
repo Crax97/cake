@@ -5,11 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
-include(thirdparty/CMakeLists.txt)
+include(thirdparty/thirdparty.cmake)
 
 message(STATUS "Updating git dependencies")
 git_update_modules()
 
-add_subdirectory(modules/theather)
+add_subdirectory(modules/spectacle)
 add_subdirectory(modules/renderer)
 
