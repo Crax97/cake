@@ -34,6 +34,8 @@ if (OPENGL_FOUND)
     endif()
 endif()
 
+set(RENDERER_EXPORTED_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+
 add_library(renderer STATIC ${SOURCES})
 target_include_directories(renderer PUBLIC include ${SDL2_INCLUDE_DIRS})
 target_include_directories(renderer PRIVATE ${OPTIONAL_INCLUDES})
