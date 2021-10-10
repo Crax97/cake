@@ -33,6 +33,8 @@ public:
   virtual std::shared_ptr<class framebuffer>
   create_framebuffer(int width, int height) noexcept = 0;
 
+  virtual void specify_viewport(int x, int y, int width,
+                                int height) noexcept = 0;
   virtual int get_viewport_width() const noexcept = 0;
   virtual int get_viewport_height() const noexcept = 0;
 

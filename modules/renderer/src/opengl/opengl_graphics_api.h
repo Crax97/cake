@@ -11,6 +11,14 @@ private:
   SDL_GLContext GLContext;
   SDL_Window *Window;
   GLuint m_unif_block_buffer{};
+
+  struct viewport_info {
+    int x;
+    int y;
+    int width;
+    int height;
+  } m_viewport;
+
   void resize_uniform_buffer(const size_t &buffer_size);
 
 public:
@@ -28,7 +36,7 @@ public:
   std::shared_ptr<class texture>
   create_texture(unsigned char *data, int width, int height,
                  texture_format format) noexcept override;
-
+  void specify_viewport(int x, int y, int width, int height) noexcept override;
   std::shared_ptr<class framebuffer>
   create_framebuffer(int width, int height) noexcept override;
   int get_viewport_width() const noexcept override;

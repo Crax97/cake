@@ -139,7 +139,7 @@ void renderer::opengl_graphics_api::pre_draw() noexcept {
   SDL_GL_MakeCurrent(this->Window, this->GLContext);
   int win_width, win_height;
   SDL_GetWindowSize(this->Window, &win_width, &win_height);
-  glViewport(0, 0, win_width, win_height);
+  specify_viewport(0, 0, win_width, win_height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   glBindBuffer(GL_UNIFORM_BUFFER, m_unif_block_buffer);
 }
@@ -301,4 +301,10 @@ std::shared_ptr<renderer::shader> renderer::opengl_graphics_api::compile_shader(
   }
 
   return std::make_shared<opengl_shader>(vs.value(), fs.value());
+}
+
+void renderer::opengl_graphics_api::specify_viewport(int x, int y, int width,
+                                                     int height) noexcept {
+  m_viewport = {x, y, width, height};
+  glViewport(x, y, width, height);
 }
