@@ -36,6 +36,7 @@ void spectacle::stage::on_stage_perform(float delta_seconds) noexcept {
     a.after_update(delta_seconds);
   });
 }
+
 void spectacle::stage::on_stage_exit() noexcept {
   for_each_actor_ref(m_actor_list, [](actor &a) {
     a.destroy();
