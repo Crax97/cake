@@ -1,7 +1,3 @@
-# Ignore all from third party
-thirdparty/*
+# Ignore any build directories
 
-# But not the CMakeLists
-!thirdparty/*.cmake
-
-build
+build*
