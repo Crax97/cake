@@ -19,6 +19,14 @@ public:
   // Called when the stage needs to release its resources
   virtual void on_stage_exit() noexcept;
 
+  std::list<std::shared_ptr<actor>> &get_all_actors() noexcept {
+    return m_actor_list;
+  }
+
+  template <typename Functor> void for_each_actor(Functor &&functor) noexcept {
+    std::for_each(m_actor_list.begin(), m_actor_list.end(), functor);
+  }
+
   virtual ~stage() = default;
 };
 } // namespace spectacle

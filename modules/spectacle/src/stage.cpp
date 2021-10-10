@@ -4,14 +4,14 @@
 
 template <spectacle::detail::Iterable It,
           std::invocable<spectacle::actor &> Functor>
-void for_each_actor(It &&it, Functor &&fun) {
+void for_each_actor_ref(It &&it, Functor &&fun) {
   for (auto &actor : it) {
     fun(*actor);
   }
 }
 
 void spectacle::stage::on_stage_enter() noexcept {
-  for_each_actor(m_actor_list, [](actor &a) { a.begin_play(); });
+  for_each_actor_ref(m_actor_list, [](actor &a) { a.begin_play(); });
 }
 void spectacle::stage::on_stage_perform(float delta_seconds) noexcept {
   // Remove pending kill actors
@@ -25,17 +25,19 @@ void spectacle::stage::on_stage_perform(float delta_seconds) noexcept {
   });
 
   // Update each actor
-  for_each_actor(m_actor_list,
-                 [delta_seconds](actor &a) { a.before_update(delta_seconds); });
+  for_each_actor_ref(m_actor_list, [delta_seconds](actor &a) {
+    a.before_update(delta_seconds);
+  });
 
-  for_each_actor(m_actor_list,
-                 [delta_seconds](actor &a) { a.update(delta_seconds); });
+  for_each_actor_ref(m_actor_list,
+                     [delta_seconds](actor &a) { a.update(delta_seconds); });
 
-  for_each_actor(m_actor_list,
-                 [delta_seconds](actor &a) { a.after_update(delta_seconds); });
+  for_each_actor_ref(m_actor_list, [delta_seconds](actor &a) {
+    a.after_update(delta_seconds);
+  });
 }
 void spectacle::stage::on_stage_exit() noexcept {
-  for_each_actor(m_actor_list, [](actor &a) {
+  for_each_actor_ref(m_actor_list, [](actor &a) {
     a.destroy();
     a.on_destroy();
   });

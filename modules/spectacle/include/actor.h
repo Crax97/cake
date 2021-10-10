@@ -17,8 +17,6 @@ private:
   bool m_is_pending_kill = false;
   std::unordered_map<std::type_index, std::shared_ptr<component>> m_components;
 
-  void perform_destroy() noexcept;
-
 protected:
   transform m_transform;
 

@@ -38,9 +38,9 @@ void spectacle::actor::after_update(float delta_time) noexcept {
   });
 }
 
-void spectacle::actor::on_destroy() noexcept { m_is_pending_kill = true; }
+void spectacle::actor::destroy() noexcept { m_is_pending_kill = true; }
 
-void spectacle::actor::perform_destroy() noexcept {
+void spectacle::actor::on_destroy() noexcept {
   for_each_component(m_components,
                      [](auto &component) { component.on_destroyed(); });
 }

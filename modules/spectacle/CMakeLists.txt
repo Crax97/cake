@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.00)
+cmake_minimum_required(VERSION 3.15)
 project(spectacle CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 set(CMAKE_CXX_STANDARD 20)
 
-file(GLOB HEADERS include/*)
+set(SPECTACLE_HEADERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(SOURCES 
+set(SPECTACLE_SOURCES 
     src/stage.cpp
     src/actor.cpp
     src/camera.cpp
@@ -17,5 +17,7 @@ if(!${GLM_HEADERS})
     message(FATAL_ERROR "No GLM Headers found!")
 endif()
 
-add_library(spectacle STATIC ${SOURCES} ${HEADERS})
+set(SPECTACLE_EXPORTED_DIRS ${SPECTACLE_HEADERS_DIR} PARENT_SCOPE)
+
+add_library(spectacle STATIC ${SPECTACLE_SOURCES})
 target_include_directories(spectacle PUBLIC include/ ${GLM_HEADERS})
