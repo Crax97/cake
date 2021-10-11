@@ -5,7 +5,7 @@
 
 namespace spectacle {
 class actor;
-class component {
+class component : public std::enable_shared_from_this<component> {
 private:
   actor &m_owner;
 
