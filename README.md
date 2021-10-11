@@ -14,4 +14,4 @@ make
 ```
 
 # How do i develop games with it?
-Wait until i give you an application framework lol
+Wait until i puth the game framework in an usable state lol
