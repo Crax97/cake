@@ -13,5 +13,7 @@ cmake ..
 make
 ```
 
+Be wary that this project requires c++20 (no modules, only concepts/constraints + some headers are used)
+
 # How do i develop games with it?
-Wait until i puth the game framework in an usable state lol
+Wait until i put the game framework in an usable state lol
