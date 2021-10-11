@@ -17,6 +17,12 @@ add_library(thirdparty_imgui STATIC ${IMGUI_SOURCES})
 target_include_directories(thirdparty_imgui PUBLIC ${IMGUI_HEADERS} ${SDL2_INCLUDE_DIRS})
 target_link_libraries(thirdparty_imgui ${SDL2_LIBRARIES})
 
+# file download
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/thirdparty/stb/stb/stb_image.h)
+   file(DOWNLOAD "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h" ${CMAKE_SOURCE_DIR}/thirdparty/stb/stb/stb_image.h)
+endif()
+set(STB_HEADERS_DIR ${CMAKE_SOURCE_DIR}/thirdparty/stb/)
+
 function(git_update_modules)
     execute_process(COMMAND git submodule update --recursive
                     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
