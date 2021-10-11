@@ -13,4 +13,6 @@ git_update_modules()
 add_subdirectory(modules/spectacle)
 add_subdirectory(modules/renderer)
 add_subdirectory(modules/input_system)
+add_subdirectory(modules/game_framework)
+add_subdirectory(modules/application)
 
