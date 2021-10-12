@@ -1,9 +1,15 @@
 #include "game_framework/components/sprite_component.h"
+#include "game_framework/components/rendering_component.h"
 #include "game_framework/loaders/texture_loader.h"
 #include "initialization_object.h"
 
+#include "actor.h"
 #include "application.h"
 #include "graphics_api.h"
+
+gameframework::sprite_component::sprite_component(
+    spectacle::actor &owner) noexcept
+    : rendering_component(owner) {}
 
 void gameframework::sprite_component::draw(
     renderer::graphics_api &api) noexcept {

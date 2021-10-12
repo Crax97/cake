@@ -1,10 +1,17 @@
 #include "game_framework/game.h"
+#include "actor.h"
 #include "game_framework/rendering_world.h"
 #include "stage.h"
+
+#include "game_framework/components/component_repository.h"
+#include "game_framework/components/sprite_component.h"
 
 #include <memory>
 
 gameframework::game *g_game{nullptr};
+
+using SpriteComponent = gameframework::sprite_component;
+DEFINE_COMPONENT_REGISTRATOR(SpriteComponent)
 
 gameframework::game::game(int argc, char **argv)
     : app_framework::application(argc, argv) {

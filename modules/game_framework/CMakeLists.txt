@@ -4,9 +4,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(GAMEFRAMEWORK_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(GAMEFRAMEWORK_SOURCES 
-${CMAKE_CURRENT_SOURCE_DIR}/src/rendering_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/rendering_world.cpp
-${CMAKE_CURRENT_SOURCE_DIR}/src/sprite_component.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/components/component_repository.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/components/rendering_component.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/components/sprite_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/texture_loader.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp
 )

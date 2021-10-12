@@ -1,7 +1,10 @@
 #include "game_framework/loaders/texture_loader.h"
 #include "application.h"
 #include "graphics_api.h"
+
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+
 #include "texture.h"
 
 std::optional<std::shared_ptr<renderer::texture>>
