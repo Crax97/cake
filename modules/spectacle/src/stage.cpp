@@ -37,6 +37,11 @@ void spectacle::stage::on_stage_perform(float delta_seconds) noexcept {
   });
 }
 
+void spectacle::stage::add_new_actor(
+    std::shared_ptr<spectacle::actor> new_actor) noexcept {
+  m_actor_list.push_back(std::move(new_actor));
+}
+
 void spectacle::stage::on_stage_exit() noexcept {
   for_each_actor_ref(m_actor_list, [](actor &a) {
     a.destroy();

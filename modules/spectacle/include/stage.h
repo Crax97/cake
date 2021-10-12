@@ -27,6 +27,8 @@ public:
     std::for_each(m_actor_list.begin(), m_actor_list.end(), functor);
   }
 
+  void add_new_actor(std::shared_ptr<actor> new_actor) noexcept;
+
   virtual ~stage() = default;
 };
 } // namespace spectacle
