@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
+option(BUILD_EDITOR "Wether to build the example library" ON)
+
 include(thirdparty/thirdparty.cmake)
 
 message(STATUS "Updating git dependencies")
@@ -16,3 +18,6 @@ add_subdirectory(modules/input_system)
 add_subdirectory(modules/game_framework)
 add_subdirectory(modules/application)
 
+if(BUILD_EDITOR)
+    add_subdirectory(editor)
+endif()
