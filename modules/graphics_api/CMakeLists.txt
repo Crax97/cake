@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(renderer CXX C)
+project(graphics_api CXX C)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 set(CMAKE_BUILD_TYPE Debug)
@@ -34,12 +34,12 @@ if (OPENGL_FOUND)
     endif()
 endif()
 
-set(RENDERER_EXPORTED_DIRS include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES} PARENT_SCOPE)
+set(GRAPHICSAPI_EXPORTED_DIRS include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES} PARENT_SCOPE)
 
-add_library(renderer STATIC ${SOURCES})
-target_include_directories(renderer PUBLIC include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES})
+add_library(graphics_api STATIC ${SOURCES})
+target_include_directories(graphics_api PUBLIC include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES})
 
-target_link_libraries(renderer ${OPTIONAL_LINK_LIBS} ${SDL2_LIBRARIES})
+target_link_libraries(graphics_api ${OPTIONAL_LINK_LIBS} ${SDL2_LIBRARIES})
 
 if (BUILD_EXAMPLES)
     file(GLOB EXAMPLES examples/*)
@@ -54,7 +54,7 @@ if (BUILD_EXAMPLES)
         
         add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCES})
         target_include_directories(${EXAMPLE_NAME} PRIVATE ${EXAMPLE_DIR} ${GLM_HEADERS} ${CMAKE_CURRENT_SOURCE_DIR}/examples/commons/)
-        target_link_libraries(${EXAMPLE_NAME} renderer)
+        target_link_libraries(${EXAMPLE_NAME} graphics_api)
     endforeach()
 
     file(COPY "examples/assets" DESTINATION ${CMAKE_BINARY_DIR})

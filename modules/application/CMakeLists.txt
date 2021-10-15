@@ -9,9 +9,9 @@ set(APPLICATION_SOURCES
 set(APPFRAMEWORK_EXPORTED_DIRS ${APPLICATION_INCLUDE_DIRS} PARENT_SCOPE)
 
 add_library(application ${APPLICATION_SOURCES})
-target_link_libraries(application renderer inputsystem)
+target_link_libraries(application graphics_api inputsystem)
 target_include_directories(application PUBLIC 
-    ${RENDERER_EXPORTED_DIRS}
+    ${GRAPHICSAPI_EXPORTED_DIRS}
     ${INPUTSYSTEM_EXPORTED_DIRS}
     ${APPLICATION_INCLUDE_DIRS}
 )
