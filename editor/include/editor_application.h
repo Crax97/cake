@@ -6,12 +6,15 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl.h"
 #include "glm/glm.hpp"
+#include "ui/sidebar.h"
 
 struct ImGuiContext;
 
 class editor_application : public gameframework::game {
 
 private:
+  editor::sidebar m_sidebar;
+
   const int sidebar_width = 200; // px
   int menubar_height = 0;
 
@@ -35,6 +38,10 @@ public:
 
   void on_sdl_event(SDL_Event &event) noexcept override {
     ImGui_ImplSDL2_ProcessEvent(&event);
+  }
+
+  std::unique_ptr<spectacle::stage> &get_editing_stage() noexcept {
+    return m_stage;
   }
   void on_app_startup() noexcept override;
   void on_app_update() noexcept override;

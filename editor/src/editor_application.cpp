@@ -20,7 +20,7 @@
 #include <memory>
 
 editor_application::editor_application(int argc, char **argv)
-    : gameframework::game(argc, argv) {}
+    : gameframework::game(argc, argv), m_sidebar(*this) {}
 
 void editor_application::on_new_level() noexcept {
   if (m_level_is_dirty) {
@@ -57,44 +57,7 @@ void editor_application::draw_menubar() noexcept {
   }
 }
 
-void editor_application::draw_sidebar() noexcept {
-  ImGui::SetNextWindowSize(ImVec2(sidebar_width, get_window().GetHeight()));
-  ImGui::SetNextWindowPos({0, static_cast<float>(menubar_height)});
-  if (ImGui::Begin("sidebar", nullptr,
-                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize)) {
-    ImGui::Text("%s", "Actors");
-    m_stage->for_each_actor([&](std::shared_ptr<spectacle::actor> m_actor) {
-      ImGui::PushID("actor");
-      ImGui::Text("actor");
-      // select_actor(m_actor);
-      if (ImGui::BeginPopupContextItem("actor",
-                                       ImGuiPopupFlags_MouseButtonLeft)) {
-        ImGui::Text("%s", "Actor Actions");
-        auto component_names =
-            gameframework::component_repository::the().get_component_names();
-        for (auto &component : component_names) {
-          if (ImGui::Button(component.c_str())) {
-            // add new component to selected actor
-          }
-        }
-        ImGui::EndPopup();
-      }
-
-      ImGui::PopID();
-    });
-
-    if (ImGui::BeginPopupContextItem("sidebar")) {
-      ImGui::Text("%s", "Actions");
-
-      if (ImGui::Button("Create new Actor")) {
-        auto actor = std::make_shared<spectacle::actor>();
-        m_stage->add_new_actor(actor);
-      }
-      ImGui::EndPopup();
-    }
-    ImGui::End();
-  }
-}
+void editor_application::draw_sidebar() noexcept { m_sidebar.draw_sidebar(); }
 
 void editor_application::update_imgui() noexcept {
   ImGui::SetCurrentContext(m_imgui_context);

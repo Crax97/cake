@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(editor CXX)
 
-file(GLOB EDITOR_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/* )
+set(EDITOR_SOURCE_FILES
+${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/editor_application.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/sidebar.cpp
+)
 set(EDITOR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(editor ${EDITOR_SOURCE_FILES})
