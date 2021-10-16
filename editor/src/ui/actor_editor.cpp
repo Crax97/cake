@@ -36,7 +36,9 @@ void draw_property(property_system::property *prop,
     void visit_double_property(double &value) {}
     void visit_float_property(float &value) {}
     void visit_string_property(std::string &value) {}
-    void visit_vec2_property(glm::vec2 &value) {}
+    void visit_vec2_property(glm::vec2 &value) {
+      ImGui::DragFloat2("vec2", &value[0]);
+    }
     void visit_vec3_property(glm::vec3 &value) {}
     void visit_vec4_property(glm::vec4 &value) {}
     void visit_texture_property(renderer::texture &value) {

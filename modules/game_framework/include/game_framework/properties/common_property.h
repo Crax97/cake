@@ -46,16 +46,22 @@ private:
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
     assert(sizeof(int) == data_size);
-    m_ref = *static_cast<int *>(data);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<int *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
     assert(sizeof(int) == data_size);
     auto &self = *static_cast<Klass *>(base);
     return static_cast<void *>(&self.*m_ref);
   }
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_int_property(value);
+  }
 
 public:
-  explicit int_property(int &ref) noexcept : m_ref(ref) {}
+  explicit int_property(int Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class float_property final : public property {
 private:
@@ -63,17 +69,23 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<float *>(data);
+    assert(sizeof(float) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<float *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
-    assert(sizeof(int) == data_size);
+    assert(sizeof(float) == data_size);
     auto &self = *static_cast<Klass *>(base);
     return static_cast<void *>(&self.*m_ref);
   }
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_float_property(value);
+  }
 
 public:
-  explicit float_property(float &ref) noexcept : m_ref(ref) {}
+  explicit float_property(float Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class double_property final : public property {
 private:
@@ -81,17 +93,23 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<double *>(data);
+    assert(sizeof(double) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<double *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
-    assert(sizeof(int) == data_size);
+    assert(sizeof(double) == data_size);
     auto &self = *static_cast<Klass *>(base);
     return static_cast<void *>(&self.*m_ref);
   }
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_double_property(value);
+  }
 
 public:
-  explicit double_property(double &ref) noexcept : m_ref(ref) {}
+  explicit double_property(double Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class string_property final : public property {
 private:
@@ -99,17 +117,23 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<std::string *>(data);
+    assert(sizeof(std::string) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<std::string *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
-    assert(sizeof(int) == data_size);
+    assert(sizeof(std::string) == data_size);
     auto &self = *static_cast<Klass *>(base);
     return static_cast<void *>(&self.*m_ref);
   }
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_string_property(value);
+  }
 
 public:
-  explicit string_property(std::string &ref) noexcept : m_ref(ref) {}
+  explicit string_property(std::string Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class vec2_property final : public property {
 private:
@@ -117,16 +141,23 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<glm::vec2 *>(data);
+    assert(sizeof(glm::vec2) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<glm::vec2 *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
     assert(sizeof(int) == data_size);
     return static_cast<void *>(&m_ref);
   }
 
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_vec2_property(value);
+  }
+
 public:
-  explicit vec2_property(glm::vec2 &ref) noexcept : m_ref(ref) {}
+  explicit vec2_property(glm::vec2 Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class vec3_property final : public property {
 private:
@@ -134,16 +165,23 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<glm::vec3 *>(data);
+    assert(sizeof(glm::vec3) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<glm::vec3 *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
-    assert(sizeof(int) == data_size);
+    assert(sizeof(glm::vec3) == data_size);
     return static_cast<void *>(&m_ref);
   }
 
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_vec3_property(value);
+  }
+
 public:
-  explicit vec3_property(glm::vec3 &ref) noexcept : m_ref(ref) {}
+  explicit vec3_property(glm::vec3 Klass::*ref) noexcept : m_ref(ref) {}
 };
 template <typename Klass> class vec4_property final : public property {
 private:
@@ -151,15 +189,22 @@ private:
 
 protected:
   virtual void set_impl(void *base, void *data, size_t data_size) override {
-    assert(sizeof(int) == data_size);
-    m_ref = *static_cast<glm::vec4 *>(data);
+    assert(sizeof(glm::vec4) == data_size);
+    auto &self = *static_cast<Klass *>(base);
+    self.*m_ref = *static_cast<glm::vec4 *>(data);
   }
   virtual void *get_impl(void *base, size_t data_size) override {
-    assert(sizeof(int) == data_size);
+    assert(sizeof(glm::vec4) == data_size);
     return static_cast<void *>(&m_ref);
   }
 
+  void visit(void *base, property_visitor &visitor) override {
+    auto &self = *static_cast<Klass *>(base);
+    auto &value = self.*m_ref;
+    visitor.visit_vec4_property(value);
+  }
+
 public:
-  explicit vec4_property(glm::vec4 &ref) noexcept : m_ref(ref) {}
+  explicit vec4_property(glm::vec4 Klass::*ref) noexcept : m_ref(ref) {}
 };
 } // namespace property_system

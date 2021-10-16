@@ -18,6 +18,7 @@ class sprite_component : public rendering_component {
 
 private:
   std::shared_ptr<renderer::texture> m_texture;
+  glm::vec2 m_sprite_scale{1};
 
 public:
   explicit sprite_component(spectacle::actor &owner) noexcept;

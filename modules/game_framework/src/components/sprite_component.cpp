@@ -16,17 +16,22 @@ gameframework::sprite_component::sprite_component(
   m_properties.emplace_back(
       std::make_shared<property_system::texture_property<sprite_component>>(
           &sprite_component::m_texture));
+  m_properties.emplace_back(
+      std::make_shared<property_system::vec2_property<sprite_component>>(
+          &sprite_component::m_sprite_scale));
 }
 
 void gameframework::sprite_component::draw(
     renderer::renderer &renderer) noexcept {
   if (!m_texture)
     return;
+  glm::vec2 m_sprite_size = {m_texture->get_width(), m_texture->get_height()};
   auto euler_rotation = glm::eulerAngles(get_owner().get_rotation());
   renderer.draw_texture(m_texture,
                         {
                             .location = get_owner().get_location(),
-                            .scale = glm::vec3(100) * get_owner().get_scale(),
+                            .scale = m_sprite_size * m_sprite_scale *
+                                     glm::vec2(get_owner().get_scale()),
                             .rotation = euler_rotation.z,
                             .z_index = -1,
                         });
