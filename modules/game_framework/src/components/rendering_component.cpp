@@ -9,11 +9,10 @@
 gameframework::rendering_component::rendering_component(spectacle::actor &owner)
     : spectacle::component(owner) {
   gameframework::game::the().get_rendering_world().register_rendering_component(
-      std::dynamic_pointer_cast<rendering_component>(shared_from_this()));
+      this);
 }
 gameframework::rendering_component::~rendering_component() noexcept {
   gameframework::game::the()
       .get_rendering_world()
-      .unregister_rendering_component(
-          std::dynamic_pointer_cast<rendering_component>(shared_from_this()));
+      .unregister_rendering_component(this);
 }

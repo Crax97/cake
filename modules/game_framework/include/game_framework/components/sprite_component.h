@@ -19,7 +19,7 @@ private:
 public:
   explicit sprite_component(spectacle::actor &owner) noexcept;
   void set_texture(::std::shared_ptr<renderer::texture> new_texture);
-  virtual void draw(renderer::graphics_api &api) noexcept override;
+  virtual void draw(renderer::renderer &renderer) noexcept override;
 
   virtual void
   initialize(const spectacle::initialization_object &object) noexcept override;

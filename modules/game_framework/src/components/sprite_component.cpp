@@ -12,9 +12,13 @@ gameframework::sprite_component::sprite_component(
     : rendering_component(owner) {}
 
 void gameframework::sprite_component::draw(
-    renderer::graphics_api &api) noexcept {
+    renderer::renderer &renderer) noexcept {
   if (!m_texture)
     return;
+  renderer.draw_texture(m_texture, {
+                                       .scale = glm::vec2(100),
+                                       .z_index = -1,
+                                   });
 }
 
 void gameframework::sprite_component::initialize(
