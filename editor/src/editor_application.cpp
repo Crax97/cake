@@ -18,6 +18,9 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
+
+using namespace std::string_literals;
 
 editor_application::editor_application(int argc, char **argv)
     : gameframework::game(argc, argv), m_sidebar(*this) {}
@@ -96,12 +99,14 @@ void editor_application::on_app_startup() noexcept {
   ImGui_ImplOpenGL3_Init(version);
 
   // TEST TEST REMOVE ME
-  // auto actor = std::make_shared<spectacle::actor>();
-  // auto sprite_component =
-  // std::make_shared<gameframework::sprite_component>(); auto init_object =
-  // spectacle::initialization_object{}; init_object.add("texture",
-  // "assets/textures/grass.png"); sprite_component->initialize(init_object);
-  // actor->add_new_component(sprite_component);
+  auto actor = std::make_shared<spectacle::actor>();
+  auto sprite_component =
+      std::make_shared<gameframework::sprite_component>(*actor.get());
+  auto init_object = spectacle::initialization_object{};
+  init_object.add("texture_path"s, "./grass.png"s);
+  sprite_component->initialize(init_object);
+  actor->add_new_component(sprite_component);
+  m_stage->add_new_actor(actor);
 }
 
 void editor_application::on_app_shutdown() noexcept {
