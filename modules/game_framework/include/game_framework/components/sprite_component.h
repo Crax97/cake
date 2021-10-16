@@ -4,6 +4,10 @@
 #include "rendering_component.h"
 #include "texture.h"
 
+#include "game_framework/properties/properties.h"
+#include "property_system/property.h"
+
+#include <list>
 #include <memory>
 
 namespace spectacle {
@@ -23,6 +27,10 @@ public:
 
   virtual void
   initialize(const spectacle::initialization_object &object) noexcept override;
+
+  virtual const char *get_component_name() const noexcept override {
+    return "Sprite Component";
+  }
 
   virtual std::shared_ptr<spectacle::component>
   clone() const noexcept override {

@@ -68,6 +68,11 @@ public:
 
     return component->second;
   }
+  template <typename Func> void for_each_component(Func &&func) noexcept {
+    for (auto &pair : m_components) {
+      func(*pair.second);
+    }
+  }
 
   virtual ~actor() = default;
 };

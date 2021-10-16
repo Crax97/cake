@@ -1,6 +1,7 @@
 #include "game_framework/components/sprite_component.h"
 #include "game_framework/components/rendering_component.h"
 #include "game_framework/loaders/texture_loader.h"
+#include "glm/gtc/quaternion.hpp"
 #include "initialization_object.h"
 
 #include "actor.h"
@@ -9,16 +10,25 @@
 
 gameframework::sprite_component::sprite_component(
     spectacle::actor &owner) noexcept
-    : rendering_component(owner) {}
+    : rendering_component(owner) {
+
+  m_properties.emplace_back(
+      std::make_shared<texture_property<sprite_component>>(
+          &sprite_component::m_texture));
+}
 
 void gameframework::sprite_component::draw(
     renderer::renderer &renderer) noexcept {
   if (!m_texture)
     return;
-  renderer.draw_texture(m_texture, {
-                                       .scale = glm::vec2(100),
-                                       .z_index = -1,
-                                   });
+  auto euler_rotation = glm::eulerAngles(get_owner().get_rotation());
+  renderer.draw_texture(m_texture,
+                        {
+                            .location = get_owner().get_location(),
+                            .scale = glm::vec3(100) * get_owner().get_scale(),
+                            .rotation = euler_rotation.z,
+                            .z_index = -1,
+                        });
 }
 
 void gameframework::sprite_component::initialize(

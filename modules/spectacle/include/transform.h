@@ -16,7 +16,7 @@ private:
 
 public:
   transform()
-      : m_location{0}, m_rotation{glm::identity<glm::quat>()}, m_scale{0} {}
+      : m_location{0}, m_rotation{glm::identity<glm::quat>()}, m_scale{1} {}
   transform(const glm::vec3 &location, const glm::quat &rotation,
             const glm::vec3 &scale = glm::vec3(1.0f))
       : m_location{location}, m_rotation{rotation}, m_scale{scale} {
@@ -54,9 +54,13 @@ public:
   glm::vec3 get_left() const noexcept;
   glm::vec3 get_up() const noexcept;
 
-  glm::vec3 get_location() const noexcept { return m_location; }
-  glm::quat get_rotation() const noexcept { return m_rotation; }
-  glm::vec3 get_scale() const noexcept { return m_scale; }
+  glm::vec3 &get_location() noexcept { return m_location; }
+  glm::quat &get_rotation() noexcept { return m_rotation; }
+  glm::vec3 &get_scale() noexcept { return m_scale; }
+
+  const glm::vec3 &get_location() const noexcept { return m_location; }
+  const glm::quat &get_rotation() const noexcept { return m_rotation; }
+  const glm::vec3 &get_scale() const noexcept { return m_scale; }
   glm::mat4 get_transform_matrix() noexcept;
 
   bool needs_to_update() const noexcept { return m_needs_update; }

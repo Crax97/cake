@@ -64,8 +64,8 @@ void renderer::renderer::draw_mesh(
   if (config.draw_shader) {
     pass_shader = config.draw_shader;
   }
-  auto model = glm::scale(config.scale) * glm::toMat4(config.rotation) *
-               glm::translate(config.location);
+  auto model = glm::translate(config.location) * glm::scale(config.scale) *
+               glm::toMat4(config.rotation);
   auto mvp = m_view_projection * model;
   pass_shader->use();
   pass_shader->set_uniform_matrix4x4("mvp", &mvp[0][0]);

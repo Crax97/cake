@@ -16,10 +16,11 @@ target_include_directories(gameframework PUBLIC
 ${GAMEFRAMEWORK_INCLUDE_DIRS} 
     ${APPFRAMEWORK_INCLUDE_DIRS} 
     ${GRAPHICSAPI_EXPORTED_DIRS} 
+    ${PROPERTYSYSTEM_EXPORTED_DIRS} 
     ${RENDERER_EXPORTED_DIRS} 
     ${SPECTACLE_EXPORTED_DIRS}
     ${STB_HEADERS_DIR}
 )
-target_link_libraries(gameframework graphics_api renderer spectacle application)
+target_link_libraries(gameframework property_system graphics_api renderer spectacle application)
 
 set(GAMEFRAMEWORK_EXPORTED_DIRS ${GAMEFRAMEWORK_INCLUDE_DIRS} PARENT_SCOPE)
