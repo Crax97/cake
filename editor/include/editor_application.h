@@ -10,6 +10,10 @@
 
 struct ImGuiContext;
 
+namespace renderer {
+class framebuffer;
+}
+
 class editor_application : public gameframework::game {
 
 private:
@@ -24,7 +28,9 @@ private:
 
   ImGuiContext *m_imgui_context{nullptr};
   glm::vec2 viewport_size{800, 600};
+  std::shared_ptr<renderer::framebuffer> m_framebuffer;
 
+  void draw_game_window() noexcept;
   void draw_menubar() noexcept;
   void draw_sidebar() noexcept;
   void update_imgui() noexcept;
@@ -32,6 +38,7 @@ private:
   void on_new_level() noexcept;
   void on_load_request() noexcept;
   void on_save_request() noexcept;
+  virtual void render_world() noexcept override;
 
 public:
   editor_application(int argc, char **argv);

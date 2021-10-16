@@ -2,6 +2,7 @@
 
 #include "SDL_video.h"
 #include "actor.h"
+#include "framebuffer.h"
 #include "game_framework/components/component_repository.h"
 #include "game_framework/components/sprite_component.h"
 #include "glad/glad.h"
@@ -14,6 +15,7 @@
 #include "mesh.h"
 #include "stage.h"
 #include "texture.h"
+#include "ui/sidebar.h"
 #include "window.h"
 
 #include <iostream>
@@ -62,6 +64,17 @@ void editor_application::draw_menubar() noexcept {
 
 void editor_application::draw_sidebar() noexcept { m_sidebar.draw_sidebar(); }
 
+void editor_application::draw_game_window() noexcept {
+  auto render_texture = m_framebuffer->get_color_texture();
+  ImGui::SetNextWindowSizeConstraints(ImVec2(800, 600),
+                                      ImVec2(FLT_MAX, FLT_MAX));
+  if (ImGui::Begin("Render window")) {
+    auto *obj = render_texture->get_texture_object();
+    ImGui::Image(obj, ImGui::GetWindowSize());
+    ImGui::End();
+  }
+}
+
 void editor_application::update_imgui() noexcept {
   ImGui::SetCurrentContext(m_imgui_context);
   glViewport(0, 0, get_window().GetWidth(), get_window().GetHeight());
@@ -73,8 +86,36 @@ void editor_application::update_imgui() noexcept {
   if (m_show_demo) {
     ImGui::ShowDemoWindow(&m_show_demo);
   }
+
+  static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+  // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window
+  // not dockable into, because it would be confusing to have two docking
+  // targets within each others.
+  ImGuiWindowFlags window_flags =
+      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  const ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+  window_flags |=
+      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::Begin("MikuEngine Editor Dockspace", nullptr, window_flags);
+  ImGui::PopStyleVar(2);
+
+  ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+  ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+  draw_game_window();
   draw_menubar();
   draw_sidebar();
+  ImGui::End();
+
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -85,11 +126,19 @@ void editor_application::on_app_update() noexcept {
           inputsystem::keyboard_key::F8)) {
     m_show_demo = !m_show_demo;
   }
+}
+
+void editor_application::render_world() noexcept {
+  m_framebuffer->bind();
+  game::render_world();
+  m_framebuffer->unbind();
   update_imgui();
 }
 
 void editor_application::on_app_startup() noexcept {
   game::on_app_startup();
+
+  m_framebuffer = get_api().create_framebuffer(1240, 720);
 
   m_imgui_context = ImGui::CreateContext();
   auto ctx = SDL_GL_GetCurrentContext();
@@ -97,6 +146,9 @@ void editor_application::on_app_startup() noexcept {
   const char *version = "#version 460 core";
   ImGui_ImplSDL2_InitForOpenGL(win, ctx);
   ImGui_ImplOpenGL3_Init(version);
+
+  auto &io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // TEST TEST REMOVE ME
   auto actor = std::make_shared<spectacle::actor>();

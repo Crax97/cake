@@ -8,7 +8,7 @@
 #include "imgui.h"
 
 void editor::sidebar::draw_sidebar() noexcept {
-  if (ImGui::Begin("sidebar", nullptr, ImGuiWindowFlags_NoTitleBar)) {
+  if (ImGui::Begin("Stage Outline", nullptr)) {
     ImGui::Text("%s", "Actors");
     m_editor.get_editing_stage()->for_each_actor(
         [&](std::shared_ptr<spectacle::actor> m_actor) {
