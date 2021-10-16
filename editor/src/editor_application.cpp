@@ -1,19 +1,19 @@
 #include "editor_application.h"
 
 #include "SDL_video.h"
-#include "actor.h"
 #include "framebuffer.h"
+#include "game_framework/actor.h"
 #include "game_framework/components/component_repository.h"
 #include "game_framework/components/sprite_component.h"
+#include "game_framework/initialization_object.h"
+#include "game_framework/stage.h"
 #include "glad/glad.h"
 #include "graphics_api.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "initialization_object.h"
 #include "input/inputsystem.h"
 #include "input/keys.h"
 #include "mesh.h"
-#include "stage.h"
 #include "texture.h"
 #include "ui/sidebar.h"
 #include "window.h"
@@ -71,7 +71,7 @@ void editor_application::draw_game_window() noexcept {
                                       ImVec2(FLT_MAX, FLT_MAX));
   if (ImGui::Begin("Render window")) {
     auto *obj = render_texture->get_texture_object();
-    ImGui::Image(obj, ImGui::GetWindowSize());
+    ImGui::Image(obj, ImGui::GetWindowSize(), ImVec2(1, 0), ImVec2(0, -1));
     ImGui::End();
   }
 }

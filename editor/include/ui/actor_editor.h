@@ -19,6 +19,10 @@ public:
   constexpr actor_editor(editor_application &application) noexcept
       : m_editor(application) {}
   void draw_editor() noexcept;
+  void
+  show_actor_transform(std::shared_ptr<spectacle::actor> the_actor) noexcept;
+  void
+  show_actor_components(std::shared_ptr<spectacle::actor> the_actor) noexcept;
   void select_actor(std::shared_ptr<spectacle::actor> new_actor);
 };
 } // namespace editor

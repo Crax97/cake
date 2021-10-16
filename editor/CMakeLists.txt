@@ -14,12 +14,10 @@ target_include_directories(editor PRIVATE ${EDITOR_INCLUDE_DIRS} ${GLM_HEADERS}
     ${GRAPHICSAPI_EXPORTED_DIRS}
     ${APPFRAMEWORK_EXPORTED_DIRS}
     ${GAMEFRAMEWORK_EXPORTED_DIRS}
-    ${SPECTACLE_EXPORTED_DIRS}
     )
 target_link_libraries(editor 
     graphics_api
     application
-    spectacle
     gameframework
     thirdparty_imgui
 )

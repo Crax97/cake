@@ -1,6 +1,6 @@
 #pragma once
 
-#include "camera.h"
+#include "game_framework/camera.h"
 #include "graphics_api.h"
 #include <memory>
 #include <vector>

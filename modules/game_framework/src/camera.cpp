@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "game_framework/camera.h"
 #include "glm/ext/matrix_clip_space.hpp"
 
 spectacle::camera::camera(int width, int height, float fov) noexcept {

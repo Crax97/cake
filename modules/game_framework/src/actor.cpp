@@ -1,6 +1,6 @@
-#include "actor.h"
+#include "game_framework/actor.h"
 
-#include "component.h"
+#include "game_framework/component.h"
 #include "utils.h"
 
 #include <algorithm>

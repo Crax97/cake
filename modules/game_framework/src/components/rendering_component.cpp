@@ -1,6 +1,6 @@
 #include "game_framework/components/rendering_component.h"
-#include "actor.h"
-#include "component.h"
+#include "game_framework/actor.h"
+#include "game_framework/component.h"
 #include "game_framework/game.h"
 
 #include "game_framework/rendering_world.h"

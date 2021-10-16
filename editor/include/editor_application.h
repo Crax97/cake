@@ -1,7 +1,7 @@
 #pragma once
 
-#include "actor.h"
 #include "application.h"
+#include "game_framework/actor.h"
 #include "game_framework/game.h"
 
 #include "backends/imgui_impl_opengl3.h"

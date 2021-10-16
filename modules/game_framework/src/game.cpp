@@ -1,8 +1,8 @@
 #include "game_framework/game.h"
-#include "actor.h"
-#include "camera.h"
+#include "game_framework/actor.h"
+#include "game_framework/camera.h"
 #include "game_framework/rendering_world.h"
-#include "stage.h"
+#include "game_framework/stage.h"
 
 #include "game_framework/components/component_repository.h"
 #include "game_framework/components/sprite_component.h"

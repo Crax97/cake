@@ -2,8 +2,8 @@
 #include "editor_application.h"
 #include "game_framework/components/component_repository.h"
 
-#include "actor.h"
-#include "stage.h"
+#include "game_framework/actor.h"
+#include "game_framework/stage.h"
 
 #include "imgui.h"
 

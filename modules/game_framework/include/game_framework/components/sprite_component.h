@@ -1,11 +1,11 @@
 #pragma once
 
-#include "actor.h"
+#include "game_framework/actor.h"
 #include "rendering_component.h"
 #include "texture.h"
 
 #include "game_framework/properties/properties.h"
-#include "property_system/property.h"
+#include "game_framework/properties/property.h"
 
 #include <list>
 #include <memory>

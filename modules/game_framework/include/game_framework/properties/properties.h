@@ -1,5 +1,5 @@
 #pragma once
-#include "property_system/property.h"
+#include "game_framework/properties/property.h"
 #include "texture.h"
 #include <cassert>
 #include <memory>

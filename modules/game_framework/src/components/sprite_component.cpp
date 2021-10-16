@@ -1,11 +1,11 @@
 #include "game_framework/components/sprite_component.h"
 #include "game_framework/components/rendering_component.h"
+#include "game_framework/initialization_object.h"
 #include "game_framework/loaders/texture_loader.h"
 #include "glm/gtc/quaternion.hpp"
-#include "initialization_object.h"
 
-#include "actor.h"
 #include "application.h"
+#include "game_framework/actor.h"
 #include "graphics_api.h"
 
 gameframework::sprite_component::sprite_component(

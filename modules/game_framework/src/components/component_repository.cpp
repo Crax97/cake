@@ -1,5 +1,5 @@
 #include "game_framework/components/component_repository.h"
-#include "component.h"
+#include "game_framework/component.h"
 
 #include <unordered_map>
 

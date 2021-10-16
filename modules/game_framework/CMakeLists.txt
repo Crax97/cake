@@ -10,17 +10,19 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/components/rendering_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/sprite_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/texture_loader.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/actor.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/stage.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/transform.cpp
 )
 add_library(gameframework STATIC ${GAMEFRAMEWORK_SOURCES})
 target_include_directories(gameframework PUBLIC 
 ${GAMEFRAMEWORK_INCLUDE_DIRS} 
     ${APPFRAMEWORK_INCLUDE_DIRS} 
-    ${GRAPHICSAPI_EXPORTED_DIRS} 
-    ${PROPERTYSYSTEM_EXPORTED_DIRS} 
+    ${GRAPHICSAPI_EXPORTED_DIRS}
     ${RENDERER_EXPORTED_DIRS} 
-    ${SPECTACLE_EXPORTED_DIRS}
     ${STB_HEADERS_DIR}
 )
-target_link_libraries(gameframework property_system graphics_api renderer spectacle application)
+target_link_libraries(gameframework graphics_api renderer application)
 
 set(GAMEFRAMEWORK_EXPORTED_DIRS ${GAMEFRAMEWORK_INCLUDE_DIRS} PARENT_SCOPE)

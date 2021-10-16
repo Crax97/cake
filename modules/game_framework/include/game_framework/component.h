@@ -1,6 +1,6 @@
 #pragma once
 
-#include "property_system/property.h"
+#include "game_framework/properties/property.h"
 
 #include "initialization_object.h"
 #include <list>

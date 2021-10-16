@@ -1,5 +1,5 @@
-#include "stage.h"
-#include "actor.h"
+#include "game_framework/stage.h"
+#include "game_framework/actor.h"
 #include "utils.h"
 
 template <spectacle::detail::Iterable It,
