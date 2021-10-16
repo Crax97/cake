@@ -20,7 +20,7 @@ public:
                                  float value) override;
   void set_uniform_vec3(const std::string &uniform_name, float *vec) override;
   void bind_textures(
-      std::vector<std::pair<std::string, std::shared_ptr<texture>>> textures)
+      std::unordered_map<std::string, std::shared_ptr<class texture>> textures)
       override;
   ~opengl_shader() noexcept;
 

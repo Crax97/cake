@@ -3,7 +3,7 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
 namespace renderer {
 class shader {
@@ -15,8 +15,8 @@ public:
                                  float value) = 0;
   virtual void set_uniform_vec3(const std::string &uniform_name,
                                 float *vec) = 0;
-  virtual void bind_textures(
-      std::vector<std::pair<std::string, std::shared_ptr<class texture>>>
-          textures) = 0;
+  virtual void
+  bind_textures(std::unordered_map<std::string, std::shared_ptr<class texture>>
+                    textures) = 0;
 };
 } // namespace renderer

@@ -73,7 +73,7 @@ void renderer::opengl_shader::set_uniform_vec3(const std::string &uniform_name,
 }
 
 void renderer::opengl_shader::bind_textures(
-    std::vector<std::pair<std::string, std::shared_ptr<texture>>> textures) {
+    std::unordered_map<std::string, std::shared_ptr<class texture>> textures) {
 
   int i = 0;
   for (auto &pair : textures) {

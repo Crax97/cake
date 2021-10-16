@@ -20,7 +20,7 @@ public:
 
   virtual std::shared_ptr<instanced_mesh> create_instanced_mesh(
       const std::shared_ptr<mesh> &mesh_template,
-      std::unique_ptr<renderer::instance_descriptor> &&descriptor) noexcept = 0;
+      std::unique_ptr<instance_descriptor> &&descriptor) noexcept = 0;
   virtual std::shared_ptr<mesh> create_mesh(vertices verts, indices ind,
                                             normals norms,
                                             tex_coords texs) noexcept = 0;
