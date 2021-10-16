@@ -58,7 +58,7 @@ public:
 
   template <typename T>
   void add_new_component(std::shared_ptr<T> new_component) noexcept {
-    m_components.emplace(typeid(*new_component, std::move(new_component)));
+    m_components.emplace(typeid(*new_component), std::move(new_component));
   }
 
   template <typename T> std::weak_ptr<T> get_component() noexcept {
