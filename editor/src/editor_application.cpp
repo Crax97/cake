@@ -25,7 +25,8 @@
 using namespace std::string_literals;
 
 editor_application::editor_application(int argc, char **argv)
-    : gameframework::game(argc, argv), m_sidebar(*this) {}
+    : gameframework::game(argc, argv), m_sidebar(*this), m_actor_editor(*this) {
+}
 
 void editor_application::on_new_level() noexcept {
   if (m_level_is_dirty) {
@@ -114,10 +115,16 @@ void editor_application::update_imgui() noexcept {
   draw_game_window();
   draw_menubar();
   draw_sidebar();
+  m_actor_editor.draw_editor();
   ImGui::End();
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void editor_application::on_actor_selected(
+    std::shared_ptr<spectacle::actor> actor) noexcept {
+  m_actor_editor.select_actor(actor);
 }
 
 void editor_application::on_app_update() noexcept {

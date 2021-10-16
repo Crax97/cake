@@ -11,6 +11,7 @@ public:
   texture(int width, int height) : m_width(width), m_height(height) {}
   virtual ~texture() = default;
   virtual void bind_to_unit(int unit) = 0;
+  virtual void *get_texture_object() = 0;
   int get_width() const noexcept { return m_width; }
   int get_height() const noexcept { return m_height; }
 };

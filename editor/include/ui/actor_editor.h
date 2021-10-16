@@ -10,14 +10,15 @@ class actor;
 class editor_application;
 
 namespace editor {
-class sidebar {
+class actor_editor {
 private:
   editor_application &m_editor;
-  std::shared_ptr<spectacle::actor> m_selected_actor;
+  std::weak_ptr<spectacle::actor> m_selected_actor;
 
 public:
-  constexpr sidebar(editor_application &application) noexcept
+  constexpr actor_editor(editor_application &application) noexcept
       : m_editor(application) {}
-  void draw_sidebar() noexcept;
+  void draw_editor() noexcept;
+  void select_actor(std::shared_ptr<spectacle::actor> new_actor);
 };
 } // namespace editor

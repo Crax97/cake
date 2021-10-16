@@ -9,23 +9,21 @@
 
 void editor::sidebar::draw_sidebar() noexcept {
   if (ImGui::Begin("Stage Outline", nullptr)) {
-    ImGui::Text("%s", "Actors");
     m_editor.get_editing_stage()->for_each_actor(
         [&](std::shared_ptr<spectacle::actor> m_actor) {
           ImGui::PushID("actor");
-          ImGui::Text("actor");
-          // select_actor(m_actor);
-          if (ImGui::BeginPopupContextItem("actor",
-                                           ImGuiPopupFlags_MouseButtonLeft)) {
-            ImGui::Text("%s", "Actor Actions");
-            auto component_names = gameframework::component_repository::the()
-                                       .get_component_names();
-            for (auto &component : component_names) {
-              if (ImGui::Button(component.c_str())) {
-                // add new component to selected actor
-              }
+          ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+          bool is_selected = m_selected_actor == m_actor;
+          if (is_selected) {
+            node_flags |= ImGuiTreeNodeFlags_Selected;
+          }
+
+          if (ImGui::TreeNodeEx("actor", node_flags)) {
+            if (ImGui::IsItemClicked() && !is_selected) {
+              m_editor.on_actor_selected(m_actor);
+              m_selected_actor = m_actor;
             }
-            ImGui::EndPopup();
+            ImGui::TreePop();
           }
 
           ImGui::PopID();

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "actor.h"
 #include "application.h"
 #include "game_framework/game.h"
 
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl.h"
 #include "glm/glm.hpp"
+#include "ui/actor_editor.h"
 #include "ui/sidebar.h"
 
 struct ImGuiContext;
@@ -18,6 +20,7 @@ class editor_application : public gameframework::game {
 
 private:
   editor::sidebar m_sidebar;
+  editor::actor_editor m_actor_editor;
 
   const int sidebar_width = 200; // px
   int menubar_height = 0;
@@ -53,6 +56,7 @@ public:
   void on_app_startup() noexcept override;
   void on_app_update() noexcept override;
   void on_app_shutdown() noexcept override;
+  void on_actor_selected(std::shared_ptr<spectacle::actor> actor) noexcept;
 
   ~editor_application() noexcept;
 };
