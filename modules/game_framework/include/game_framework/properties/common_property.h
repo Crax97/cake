@@ -29,15 +29,17 @@ protected:
     return nullptr;
   }
 
-public:
-  explicit texture_property(
-      std::shared_ptr<renderer::texture> Klass::*ref) noexcept
-      : m_ref(ref) {}
   void visit(void *base, property_visitor &visitor) override {
     auto &self = *static_cast<Klass *>(base);
     auto text_ptr = self.*m_ref;
     visitor.visit_texture_property(*text_ptr);
   }
+
+public:
+  explicit texture_property(
+      const std::string &name,
+      std::shared_ptr<renderer::texture> Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class int_property final : public property {
 private:
@@ -61,7 +63,8 @@ protected:
   }
 
 public:
-  explicit int_property(int Klass::*ref) noexcept : m_ref(ref) {}
+  explicit int_property(const std::string &name, int Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class float_property final : public property {
 private:
@@ -85,7 +88,8 @@ protected:
   }
 
 public:
-  explicit float_property(float Klass::*ref) noexcept : m_ref(ref) {}
+  explicit float_property(const std::string &name, float Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class double_property final : public property {
 private:
@@ -109,7 +113,8 @@ protected:
   }
 
 public:
-  explicit double_property(double Klass::*ref) noexcept : m_ref(ref) {}
+  explicit double_property(const std::string &name, double Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class string_property final : public property {
 private:
@@ -133,7 +138,9 @@ protected:
   }
 
 public:
-  explicit string_property(std::string Klass::*ref) noexcept : m_ref(ref) {}
+  explicit string_property(const std::string &name,
+                           std::string Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class vec2_property final : public property {
 private:
@@ -157,7 +164,9 @@ protected:
   }
 
 public:
-  explicit vec2_property(glm::vec2 Klass::*ref) noexcept : m_ref(ref) {}
+  explicit vec2_property(const std::string &name,
+                         glm::vec2 Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class vec3_property final : public property {
 private:
@@ -181,7 +190,9 @@ protected:
   }
 
 public:
-  explicit vec3_property(glm::vec3 Klass::*ref) noexcept : m_ref(ref) {}
+  explicit vec3_property(const std::string &name,
+                         glm::vec3 Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 template <typename Klass> class vec4_property final : public property {
 private:
@@ -205,6 +216,8 @@ protected:
   }
 
 public:
-  explicit vec4_property(glm::vec4 Klass::*ref) noexcept : m_ref(ref) {}
+  explicit vec4_property(const std::string &name,
+                         glm::vec4 Klass::*ref) noexcept
+      : property(name), m_ref(ref) {}
 };
 } // namespace property_system

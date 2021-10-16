@@ -32,21 +32,26 @@ void editor::actor_editor::draw_editor() noexcept {
 void draw_property(property_system::property *prop,
                    spectacle::component *component) {
   class imgui_drawer : public property_system::property_visitor {
+  public:
+    property_system::property *m_prop;
+    imgui_drawer(property_system::property *in_prop) : m_prop(in_prop) {}
     void visit_int_property(int &value) {}
     void visit_double_property(double &value) {}
     void visit_float_property(float &value) {}
     void visit_string_property(std::string &value) {}
     void visit_vec2_property(glm::vec2 &value) {
-      ImGui::DragFloat2("vec2", &value[0]);
+      ImGui::DragFloat2(m_prop->get_property_name().c_str(), &value[0]);
     }
     void visit_vec3_property(glm::vec3 &value) {}
     void visit_vec4_property(glm::vec4 &value) {}
     void visit_texture_property(renderer::texture &value) {
+      ImGui::Text("%s", m_prop->get_property_name().c_str());
+      ImGui::SameLine();
       ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
     }
   };
 
-  auto drawer = imgui_drawer{};
+  auto drawer = imgui_drawer{prop};
   prop->visit(component, drawer);
 }
 

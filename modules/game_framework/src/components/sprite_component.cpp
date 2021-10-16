@@ -15,10 +15,10 @@ gameframework::sprite_component::sprite_component(
 
   m_properties.emplace_back(
       std::make_shared<property_system::texture_property<sprite_component>>(
-          &sprite_component::m_texture));
+          "Sprite texture", &sprite_component::m_texture));
   m_properties.emplace_back(
       std::make_shared<property_system::vec2_property<sprite_component>>(
-          &sprite_component::m_sprite_scale));
+          "Sprite scale", &sprite_component::m_sprite_scale));
 }
 
 void gameframework::sprite_component::draw(
