@@ -1,8 +1,11 @@
 #pragma once
 
+#include "camera.h"
 #include "graphics_api.h"
 #include <memory>
 #include <vector>
+
+#include "renderer/renderer.hpp"
 
 namespace renderer {
 class graphics_api;
@@ -14,17 +17,20 @@ class rendering_component;
 
 class rendering_world {
 private:
-  std::vector<std::shared_ptr<rendering_component>> m_rendering_components;
+  std::vector<rendering_component *> m_rendering_components;
+  renderer::renderer m_renderer;
 
 public:
-  explicit rendering_world(renderer::graphics_api &api) noexcept {}
+  explicit rendering_world(renderer::graphics_api &api) noexcept
+      : m_renderer(api) {}
 
   void register_rendering_component(
-      std::shared_ptr<rendering_component> new_component) noexcept;
+      gameframework::rendering_component *new_component) noexcept;
 
   void unregister_rendering_component(
-      std::shared_ptr<rendering_component> which_component) noexcept;
+      gameframework::rendering_component *which_component) noexcept;
 
-  void render(renderer::graphics_api &api) noexcept;
+  void render(renderer::graphics_api &api,
+              spectacle::camera &m_camera) noexcept;
 };
 } // namespace gameframework

@@ -1,5 +1,6 @@
 #include "game_framework/game.h"
 #include "actor.h"
+#include "camera.h"
 #include "game_framework/rendering_world.h"
 #include "stage.h"
 
@@ -20,12 +21,16 @@ gameframework::game::game(int argc, char **argv)
   m_height = 1080;
 }
 void gameframework::game::on_app_startup() noexcept {
+  m_camera = spectacle::camera(m_width, m_height, 75.0f);
   m_rendering_world =
       std::make_unique<gameframework::rendering_world>(get_api());
   m_stage = std::make_unique<spectacle::stage>();
   m_stage->on_stage_enter();
 }
-void gameframework::game::on_app_update() noexcept {}
+void gameframework::game::on_app_update() noexcept {
+  update_game();
+  render_world();
+}
 void gameframework::game::on_app_shutdown() noexcept {
   m_stage->on_stage_exit();
 }
@@ -40,7 +45,7 @@ void gameframework::game::update_game() noexcept {
 }
 
 void gameframework::game::render_world() noexcept {
-  m_rendering_world->render(get_api());
+  m_rendering_world->render(get_api(), m_camera);
 }
 
 gameframework::game &gameframework::game::the() noexcept { return *g_game; }

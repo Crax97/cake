@@ -16,6 +16,8 @@ private:
 
 public:
   camera_mode current_mode;
+  camera() noexcept : camera(1240, 720, 80.0f) {}
+  camera(int width, int height, float fov) noexcept;
 
   glm::mat4 get_view_matrix() noexcept;
   glm::mat4 get_projection_matrix() const noexcept;

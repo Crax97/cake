@@ -1,6 +1,7 @@
 #pragma once
 
 #include "application.h"
+#include "camera.h"
 #include <memory>
 
 namespace spectacle {
@@ -18,6 +19,8 @@ protected:
 
   virtual void update_game() noexcept;
   virtual void render_world() noexcept;
+
+  spectacle::camera m_camera;
 
 public:
   game(int argc, char **argv);

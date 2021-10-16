@@ -5,14 +5,12 @@
 #include <algorithm>
 
 void gameframework::rendering_world::register_rendering_component(
-    std::shared_ptr<gameframework::rendering_component>
-        new_component) noexcept {
-  m_rendering_components.emplace_back(std::move(new_component));
+    gameframework::rendering_component *new_component) noexcept {
+  m_rendering_components.emplace_back(new_component);
 }
 
 void gameframework::rendering_world::unregister_rendering_component(
-    std::shared_ptr<gameframework::rendering_component>
-        which_component) noexcept {
+    gameframework::rendering_component *which_component) noexcept {
   auto found = std::find(m_rendering_components.begin(),
                          m_rendering_components.end(), which_component);
   if (found != m_rendering_components.end()) {
@@ -21,8 +19,11 @@ void gameframework::rendering_world::unregister_rendering_component(
 }
 
 void gameframework::rendering_world::render(
-    renderer::graphics_api &api) noexcept {
+    renderer::graphics_api &api, spectacle::camera &m_camera) noexcept {
+  m_renderer.begin_scene(m_camera.get_view_projection_matrix());
   std::for_each(m_rendering_components.begin(), m_rendering_components.end(),
-                [&api](std::shared_ptr<gameframework::rendering_component>
-                           &which_component) { which_component->draw(api); });
+                [&](gameframework::rendering_component *which_component) {
+                  which_component->draw(m_renderer);
+                });
+  m_renderer.flush();
 }
