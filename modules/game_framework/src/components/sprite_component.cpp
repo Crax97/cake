@@ -6,6 +6,7 @@
 
 #include "application.h"
 #include "game_framework/actor.h"
+#include "game_framework/properties/common_property.h"
 #include "graphics_api.h"
 
 gameframework::sprite_component::sprite_component(
@@ -13,7 +14,7 @@ gameframework::sprite_component::sprite_component(
     : rendering_component(owner) {
 
   m_properties.emplace_back(
-      std::make_shared<texture_property<sprite_component>>(
+      std::make_shared<property_system::texture_property<sprite_component>>(
           &sprite_component::m_texture));
 }
 

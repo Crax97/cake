@@ -1,5 +1,7 @@
 #pragma once
 
+#include "property_visitor.h"
+
 #include <cstddef>
 namespace property_system {
 class property {
@@ -14,5 +16,6 @@ public:
   template <typename T> T &get(void *base) noexcept {
     return *static_cast<T *>(get_impl(base, sizeof(T)));
   }
+  virtual void visit(void *base, property_visitor &visitor) = 0;
 };
 } // namespace property_system

@@ -6,11 +6,12 @@
 
 #include "game_framework/actor.h"
 #include "game_framework/components/sprite_component.h"
-#include "game_framework/properties/properties.h"
 #include "game_framework/properties/property.h"
 #include "game_framework/stage.h"
 #include "glm/gtc/quaternion.hpp"
 #include "graphics_api.h"
+
+#include "game_framework/properties/property_visitor.h"
 
 #include "imgui.h"
 #include "texture.h"
@@ -30,19 +31,21 @@ void editor::actor_editor::draw_editor() noexcept {
 
 void draw_property(property_system::property *prop,
                    spectacle::component *component) {
-  if (auto *texture_prop =
-          dynamic_cast<gameframework::texture_property_interface *>(prop)) {
-    auto tex = texture_prop->get_texture(component);
-    ImGui::Text("Sprite Texture");
-    float tex_width = ImGui::GetWindowWidth() / 2;
-    float tex_height = tex->get_height() * (tex_width / tex->get_width());
-    ImGui::Image(tex->get_texture_object(), ImVec2(tex_width, tex_height),
-                 ImVec2(1, 0), ImVec2(0, 1));
-    ImGui::SameLine();
-    if (ImGui::Button("Select Texture")) {
-      // on_texture_load_request(tex);
+  class imgui_drawer : public property_system::property_visitor {
+    void visit_int_property(int &value) {}
+    void visit_double_property(double &value) {}
+    void visit_float_property(float &value) {}
+    void visit_string_property(std::string &value) {}
+    void visit_vec2_property(glm::vec2 &value) {}
+    void visit_vec3_property(glm::vec3 &value) {}
+    void visit_vec4_property(glm::vec4 &value) {}
+    void visit_texture_property(renderer::texture &value) {
+      ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
     }
-  }
+  };
+
+  auto drawer = imgui_drawer{};
+  prop->visit(component, drawer);
 }
 
 void editor::actor_editor::show_actor_transform(
