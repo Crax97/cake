@@ -1,52 +1,11 @@
 #pragma once
 
+#include "extensions/std_extensions.h"
 #include <cassert>
 #include <iomanip>
 #include <ostream>
 #include <string>
 #include <unordered_map>
-
-namespace std {
-template <typename T> T from_string(const std::string &_val) {
-  assert(false);
-  std::exit(-1);
-}
-template <>
-inline std::string from_string<std::string>(const std::string &val) {
-  return val;
-}
-template <> inline int from_string(const std::string &val) {
-  return std::stoi(val);
-}
-template <> inline unsigned int from_string(const std::string &val) {
-  return std::stoul(val);
-}
-
-template <> inline long from_string(const std::string &val) {
-  return std::stol(val);
-}
-template <> inline unsigned long from_string(const std::string &val) {
-  return std::stoul(val);
-}
-template <> inline unsigned long long from_string(const std::string &val) {
-  return std::stoull(val);
-}
-template <> inline bool from_string(const std::string &val) {
-  return val == "true";
-}
-
-template <> inline char from_string(const std::string &val) { return val[0]; }
-template <> inline unsigned char from_string(const std::string &val) {
-  return val[0];
-}
-template <> inline float from_string(const std::string &val) {
-  return std::stof(val);
-}
-template <> inline double from_string(const std::string &val) {
-  return std::stod(val);
-}
-} // namespace std
-
 namespace spectacle {
 class initialization_object {
 private:
