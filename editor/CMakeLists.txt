@@ -19,5 +19,6 @@ target_link_libraries(editor
     graphics_api
     application
     gameframework
+    core
     thirdparty_imgui
 )

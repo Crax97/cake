@@ -3,6 +3,8 @@
 #include "glm/fwd.hpp"
 #include "transform.h"
 
+#include "object/object.h"
+
 #include <memory>
 #include <typeindex>
 #include <typeinfo>
@@ -10,9 +12,9 @@
 
 namespace spectacle {
 class component;
-class actor {
+class actor : public object {
   friend class stage;
-
+  GENERATE_REFLECT_BODY(actor)
 private:
   bool m_is_pending_kill = false;
   std::unordered_map<std::type_index, std::shared_ptr<component>> m_components;

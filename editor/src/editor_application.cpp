@@ -7,6 +7,8 @@
 #include "game_framework/components/sprite_component.h"
 #include "game_framework/initialization_object.h"
 #include "game_framework/stage.h"
+#include "serializers/string_serializer.h"
+
 #include "glad/glad.h"
 #include "graphics_api.h"
 #include "imgui.h"
@@ -132,6 +134,16 @@ void editor_application::on_app_update() noexcept {
   if (inputsystem::inputsystem::is_button_just_pressed(
           inputsystem::keyboard_key::F8)) {
     m_show_demo = !m_show_demo;
+  }
+
+  if (inputsystem::inputsystem::is_button_just_pressed(
+          inputsystem::keyboard_key::F4)) {
+    auto selected_actor = m_actor_editor.get_selected_actor();
+    if (selected_actor) {
+      string_serializer ser;
+      selected_actor->serialize(ser);
+      std::cout << ser.get_str();
+    }
   }
 }
 

@@ -1,9 +1,14 @@
 #pragma once
 
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/vector_float3.hpp"
 #include "glm/gtx/quaternion.hpp"
 #include <glm/fwd.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/mat4x4.hpp>
+
+#include "object/field.h"
+#include <memory>
 
 namespace spectacle {
 class transform {
@@ -66,5 +71,155 @@ public:
   bool needs_to_update() const noexcept { return m_needs_update; }
 
   void update_transform_matrix() noexcept;
+
+  template <typename Class>
+  static std::unique_ptr<field>
+  make_transform_field_location(transform Class::*m_transform_ptr) {
+    class location_field : public field {
+      transform Class::*m_field_ptr;
+
+      Class &get_self(void *base) { return *static_cast<Class *>(base); }
+      const Class &get_self(void *base) const {
+        return *static_cast<Class *>(base);
+      }
+
+    public:
+      location_field(transform Class::*field_ptr)
+          : field("location", get_type<transform>()), m_field_ptr(field_ptr) {}
+      virtual void *get_impl(void *base, const std::type_info &info) override {
+        assert(typeid(glm::vec3) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<void *>(&my_transform.m_location);
+      }
+      virtual const void *get_impl(void *base,
+                                   const std::type_info &info) const override {
+        assert(typeid(glm::vec3) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<const void *>(&my_transform.m_location);
+      }
+
+      virtual std::string to_string(void *base) const noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return std::to_string(my_transform.m_location);
+      }
+      virtual void set_from_string(void *base,
+                                   const std::string &value) noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        my_transform.m_location = std::from_string<glm::vec3>(value);
+      }
+
+      virtual void visit(void *base, field_visitor &visitor) override {
+        glm::vec3 &ref = (get_self(base).*m_field_ptr).m_location;
+        return visitor.visit_vec3_property(ref);
+      }
+
+      ~location_field() {}
+    };
+
+    return std::make_unique<location_field>(m_transform_ptr);
+  }
+  template <typename Class>
+  static std::unique_ptr<field>
+  make_transform_field_rotation(transform Class::*m_transform_ptr) {
+    class rotation_field : public field {
+      transform Class::*m_field_ptr;
+
+      Class &get_self(void *base) { return *static_cast<Class *>(base); }
+      const Class &get_self(void *base) const {
+        return *static_cast<Class *>(base);
+      }
+
+    public:
+      rotation_field(transform Class::*field_ptr)
+          : field("rotation", get_type<transform>()), m_field_ptr(field_ptr) {}
+      virtual void *get_impl(void *base, const std::type_info &info) override {
+        assert(typeid(glm::quat) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<void *>(&my_transform.m_location);
+      }
+      virtual const void *get_impl(void *base,
+                                   const std::type_info &info) const override {
+        assert(typeid(glm::quat) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<const void *>(&my_transform.m_rotation);
+      }
+
+      virtual std::string to_string(void *base) const noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return std::to_string(glm::eulerAngles(my_transform.m_rotation));
+      }
+      virtual void set_from_string(void *base,
+                                   const std::string &value) noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        auto euler = std::from_string<glm::vec3>(value);
+        my_transform.m_rotation = glm::toQuat(glm::orientate3(euler));
+      }
+
+      virtual void visit(void *base, field_visitor &visitor) override {
+        glm::quat &ref = (get_self(base).*m_field_ptr).m_rotation;
+        return visitor.visit_quat_property(ref);
+      }
+      ~rotation_field() {}
+    };
+
+    return std::make_unique<rotation_field>(m_transform_ptr);
+  }
+  template <typename Class>
+  static std::unique_ptr<field>
+  make_transform_field_scale(transform Class::*m_transform_ptr) {
+    class scale_field : public field {
+      transform Class::*m_field_ptr;
+
+      Class &get_self(void *base) { return *static_cast<Class *>(base); }
+      const Class &get_self(void *base) const {
+        return *static_cast<Class *>(base);
+      }
+
+    public:
+      scale_field(transform Class::*field_ptr)
+          : field("scale", get_type<transform>()), m_field_ptr(field_ptr) {}
+      virtual void *get_impl(void *base, const std::type_info &info) override {
+        assert(typeid(glm::vec3) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<void *>(&my_transform.m_scale);
+      }
+      virtual const void *get_impl(void *base,
+                                   const std::type_info &info) const override {
+        assert(typeid(glm::vec3) == info &&
+               "Tried to get something with the wrong type!");
+        assert(base != nullptr && "Tried to get a property from a null");
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return reinterpret_cast<const void *>(&my_transform.m_scale);
+      }
+
+      virtual std::string to_string(void *base) const noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        return std::to_string(my_transform.m_scale);
+      }
+      virtual void set_from_string(void *base,
+                                   const std::string &value) noexcept override {
+        auto &my_transform = get_self(base).*m_field_ptr;
+        my_transform.m_scale = std::from_string<glm::vec3>(value);
+      }
+
+      virtual void visit(void *base, field_visitor &visitor) override {
+        glm::vec3 &ref = (get_self(base).*m_field_ptr).m_scale;
+        return visitor.visit_vec3_property(ref);
+      }
+      ~scale_field() {}
+    };
+
+    return std::make_unique<scale_field>(m_transform_ptr);
+  }
 };
 } // namespace spectacle

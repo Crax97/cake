@@ -7,6 +7,11 @@
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "object/field.h"
+
+using transform = spectacle::transform;
+DECL_TYPE_INFO(transform)
+
 spectacle::transform &
 spectacle::transform::operator=(const transform &other) noexcept {
   m_location = other.m_location;
