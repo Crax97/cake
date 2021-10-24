@@ -16,6 +16,6 @@ public:
   explicit rendering_component(spectacle::actor &owner);
 
   virtual void draw(renderer::renderer &renderer) noexcept = 0;
-  virtual ~rendering_component() noexcept;
+  ~rendering_component() noexcept override;
 };
 } // namespace gameframework

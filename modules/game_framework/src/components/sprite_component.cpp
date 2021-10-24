@@ -6,20 +6,14 @@
 
 #include "application.h"
 #include "game_framework/actor.h"
-#include "game_framework/properties/common_property.h"
 #include "graphics_api.h"
 
-gameframework::sprite_component::sprite_component(
-    spectacle::actor &owner) noexcept
-    : rendering_component(owner) {
+#include "sprite_component.gen.h"
 
-  m_properties.emplace_back(
-      std::make_shared<property_system::texture_property<sprite_component>>(
-          "Sprite texture", &sprite_component::m_texture));
-  m_properties.emplace_back(
-      std::make_shared<property_system::vec2_property<sprite_component>>(
-          "Sprite scale", &sprite_component::m_sprite_scale));
-}
+
+gameframework::sprite_component::sprite_component(spectacle::actor &owner) noexcept
+    : rendering_component(owner) { }
+
 
 void gameframework::sprite_component::draw(
     renderer::renderer &renderer) noexcept {

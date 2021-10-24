@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game_framework/properties/property.h"
+#include "object/object.h"
 
 #include "initialization_object.h"
 #include <list>
@@ -8,12 +8,9 @@
 
 namespace spectacle {
 class actor;
-class component : public std::enable_shared_from_this<component> {
+class component : public object, public std::enable_shared_from_this<component> {
 private:
   actor &m_owner;
-
-protected:
-  std::list<std::shared_ptr<property_system::property>> m_properties;
 
 public:
   explicit component(actor &owner) : m_owner(owner) {}
@@ -26,12 +23,7 @@ public:
   virtual void after_update(float delta_time) noexcept {}
   virtual void on_destroyed() noexcept {}
 
-  virtual const char *get_component_name() const noexcept = 0;
   virtual std::shared_ptr<component> clone() const noexcept = 0;
-  std::list<std::shared_ptr<property_system::property>> &
-  get_editable_properties() {
-    return m_properties;
-  }
 
   actor &get_owner() noexcept { return m_owner; }
 

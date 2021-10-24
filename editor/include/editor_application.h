@@ -41,7 +41,7 @@ private:
   void on_new_level() noexcept;
   void on_load_request() noexcept;
   void on_save_request() noexcept;
-  virtual void render_world() noexcept override;
+  void render_world() noexcept override;
 
 public:
   editor_application(int argc, char **argv);
@@ -58,5 +58,5 @@ public:
   void on_app_shutdown() noexcept override;
   void on_actor_selected(std::shared_ptr<spectacle::actor> actor) noexcept;
 
-  ~editor_application() noexcept;
+  ~editor_application() noexcept override;
 };
