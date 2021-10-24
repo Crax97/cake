@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <typeinfo>
+#include <list>
 
 #include "extensions/std_extensions.h"
 #include "field_visitor.h"
@@ -99,48 +100,56 @@ public:
 
   virtual ~field(){};
 };
+
 template <typename Class, typename Type>
-std::unique_ptr<field> make_class_field(const std::string &member_name,
-                                        Type Class::*ptr) {
-  class class_field : public field {
-    Type Class::*m_field_ptr;
+class field_adder {
+        class class_field : public field {
+            Type Class::*m_field_ptr;
 
-    Class &get_self(void *base) { return *static_cast<Class *>(base); }
-    const Class &get_self(void *base) const {
-      return *static_cast<Class *>(base);
-    }
+            Class &get_self(void *base) { return *static_cast<Class *>(base); }
 
-  public:
-    class_field(std::string field_name, Type Class::*field_ptr)
-        : field(field_name, get_type<Type>()), m_field_ptr(field_ptr) {}
-    virtual void *get_impl(void *base, const std::type_info &info) override {
-      assert(typeid(Type) == info &&
-             "Tried to get something with the wrong type!");
-      assert(base != nullptr && "Tried to get a property from a null");
-      return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
-    }
-    virtual const void *get_impl(void *base,
-                                 const std::type_info &info) const override {
-      assert(typeid(Type) == info &&
-             "Tried to get something with the wrong type!");
-      assert(base != nullptr && "Tried to get a property from a null");
-      return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
-    }
+            const Class &get_self(void *base) const {
+                return *static_cast<Class *>(base);
+            }
 
-    virtual std::string to_string(void *base) const noexcept override {
-      return std::to_string(get_self(base).*m_field_ptr);
-    }
-    virtual void set_from_string(void *base,
-                                 const std::string &value) noexcept override {
-      get_self(base).*m_field_ptr = std::from_string<Type>(value);
-    }
+        public:
+            class_field(std::string field_name, Type Class::*field_ptr)
+                    : field(field_name, get_type<Type>()), m_field_ptr(field_ptr) {}
 
-    virtual void visit(void *base, field_visitor &visitor) override {
-      Type &ref = get_self(base).*m_field_ptr;
-      return do_visit<Type>(ref, visitor);
-    }
+            virtual void *get_impl(void *base, const std::type_info &info) override {
+                assert(typeid(Type) == info &&
+                       "Tried to get something with the wrong type!");
+                assert(base != nullptr && "Tried to get a property from a null");
+                return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
+            }
 
-    ~class_field() {}
-  };
-  return std::make_unique<class_field>(member_name, ptr);
-}
+            virtual const void *get_impl(void *base,
+                                         const std::type_info &info) const override {
+                assert(typeid(Type) == info &&
+                       "Tried to get something with the wrong type!");
+                assert(base != nullptr && "Tried to get a property from a null");
+                return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
+            }
+
+            virtual std::string to_string(void *base) const noexcept override {
+                return std::to_string(get_self(base).*m_field_ptr);
+            }
+
+            virtual void set_from_string(void *base,
+                                         const std::string &value) noexcept override {
+                get_self(base).*m_field_ptr = std::from_string<Type>(value);
+            }
+
+            virtual void visit(void *base, field_visitor &visitor) override {
+                Type &ref = get_self(base).*m_field_ptr;
+                return do_visit<Type>(ref, visitor);
+            }
+
+            ~class_field() {}
+        };
+public:
+        void operator()(
+                std::list<std::unique_ptr<field>> &fields, const std::string &member_name, Type Class::* ptr) {
+            fields.emplace_back(std::make_unique<class_field>(member_name, ptr));
+        }
+};

@@ -12,19 +12,20 @@
 
 namespace spectacle {
 class component;
-class actor : public object {
-  friend class stage;
+
+class REFLECT actor : public object {
   GENERATE_REFLECT_BODY(actor)
+    friend class stage;
 private:
   bool m_is_pending_kill = false;
   std::unordered_map<std::type_index, std::shared_ptr<component>> m_components;
 
 protected:
-  transform m_transform;
+  transform REFLECT m_transform;
 
 public:
-  bool is_enabled = true;
-  bool tick_enabled = true;
+  bool REFLECT is_enabled = true;
+  bool REFLECT tick_enabled = true;
 
   // When this actor enters the scene
   virtual void begin_play() noexcept;

@@ -9,23 +9,7 @@
 #include <concepts>
 #include <type_traits>
 
-namespace spectacle {
-class actor_descriptor : public descriptor {
-public:
-  actor_descriptor() : descriptor("actor", nullptr) {
-    m_fields.emplace_back(
-        make_class_field("is_enabled", &spectacle::actor::is_enabled));
-    m_fields.emplace_back(
-        make_class_field("tick_enabled", &spectacle::actor::tick_enabled));
-    m_fields.emplace_back(spectacle::transform::make_transform_field_location(
-        &spectacle::actor::m_transform));
-    m_fields.emplace_back(spectacle::transform::make_transform_field_rotation(
-        &spectacle::actor::m_transform));
-    m_fields.emplace_back(spectacle::transform::make_transform_field_scale(
-        &spectacle::actor::m_transform));
-  }
-};
-} // namespace spectacle
+#include "actor.gen.h"
 
 void spectacle::actor::begin_play() noexcept {
   for_each_component([](auto &component) { component.begin_play(); });
@@ -83,9 +67,4 @@ glm::quat spectacle::actor::get_rotation() const noexcept {
 }
 glm::vec3 spectacle::actor::get_scale() const noexcept {
   return m_transform.get_scale();
-}
-
-descriptor *spectacle::actor::get_descriptor() {
-  static spectacle::actor_descriptor desc;
-  return &desc;
 }

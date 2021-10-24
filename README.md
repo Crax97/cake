@@ -13,6 +13,9 @@ cmake ..
 make
 ```
 
+Some of the headers of this program (specifically the ones in the `generated_headers` folder) are generated using the 
+[Katsu](https://github.com/Crax97/katsu) generator
+
 Be wary that this project requires c++20 (no modules, only concepts/constraints + some headers are used)
 
 # How do i develop games with it?

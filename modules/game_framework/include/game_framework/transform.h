@@ -223,3 +223,17 @@ public:
   }
 };
 } // namespace spectacle
+template<typename Class>
+class field_adder<Class, spectacle::transform> {
+
+public:
+    void operator()(
+            std::list<std::unique_ptr<field>> &fields, const std::string &member_name, spectacle::transform Class::* ptr) {
+        auto loc_field = spectacle::transform::make_transform_field_location(ptr);
+        auto rot_field = spectacle::transform::make_transform_field_rotation(ptr);
+        auto scale_field = spectacle::transform::make_transform_field_scale(ptr);
+        fields.emplace_back(std::move(loc_field));
+        fields.emplace_back(std::move(rot_field));
+        fields.emplace_back(std::move(scale_field));
+    }
+};

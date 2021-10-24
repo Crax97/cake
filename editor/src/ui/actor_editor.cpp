@@ -45,9 +45,9 @@ void draw_property(property_system::property *prop,
     void visit_vec3_property(glm::vec3 &value) {}
     void visit_vec4_property(glm::vec4 &value) {}
     void visit_texture_property(renderer::texture &value) {
-      ImGui::Text("%s", m_prop->get_property_name().c_str());
-      ImGui::SameLine();
-      ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
+      // ImGui::Text("%s", m_prop->get_property_name().c_str());
+      // ImGui::SameLine();
+      // ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
     }
   };
 

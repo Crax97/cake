@@ -1,3 +1,4 @@
 # Ignore any build directories
 
 build*
+cmake-build-debug

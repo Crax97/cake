@@ -10,9 +10,7 @@
 #include <string>
 #include <typeinfo>
 
-#define CLASS(...) __attribute((annotate("reflect")), __VA_ARGS__)
-
-#define FIELD(...) __attribute((annotate("reflect")), __VA_ARGS__)
+#define REFLECT
 
 #define GENERATE_REFLECT_BODY(Class)                                           \
 public:                                                                        \

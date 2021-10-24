@@ -12,6 +12,8 @@ include(thirdparty/thirdparty.cmake)
 message(STATUS "Updating git dependencies")
 git_update_modules()
 
+include_directories(generated_headers)
+
 add_subdirectory(modules/core)
 add_subdirectory(modules/game_framework)
 add_subdirectory(modules/graphics_api)
