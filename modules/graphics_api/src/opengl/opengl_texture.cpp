@@ -17,3 +17,7 @@ void renderer::opengl_texture::bind_to_unit(int unit) {
   glBindTexture(GL_TEXTURE_2D, m_texture);
   glActiveTexture(GL_TEXTURE0 + unit);
 }
+
+bool renderer::opengl_texture::has_valid_texture() const {
+    return m_texture != 0;
+}
