@@ -1,4 +1,5 @@
-// This file was generated automatically using the katsu generator
+// This file was generated automatically using the katsu code analyzer or whatever they are called
+// https://github.com/crax97/katsu 
 
 #include "object/descriptor.h"
 #include "object/object.h"
@@ -11,6 +12,9 @@ class actor_descriptor : public descriptor{
     field_adder<spectacle::actor,decltype(spectacle::actor::is_enabled)>()(m_fields, "is_enabled", &actor::is_enabled);
     field_adder<spectacle::actor,decltype(spectacle::actor::tick_enabled)>()(m_fields, "tick_enabled", &actor::tick_enabled);
 
+    }
+    [[nodiscard]] const std::type_info& get_typeinfo() const override {
+        return typeid(spectacle::actor);
     }
 };
 }

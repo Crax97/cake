@@ -10,6 +10,8 @@
 
 #include "sprite_component.gen.h"
 
+#include "object/field.h"
+
 
 gameframework::sprite_component::sprite_component(spectacle::actor &owner) noexcept
     : rendering_component(owner) { }
@@ -43,3 +45,6 @@ void gameframework::sprite_component::initialize(
     m_texture = texture_maybe.value();
   }
 }
+
+
+DECL_TYPE_INFO(renderer::texture)

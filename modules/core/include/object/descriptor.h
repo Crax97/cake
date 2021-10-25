@@ -19,8 +19,9 @@ public:
   descriptor(const std::string &field_name, descriptor *parent)
       : m_field_name(field_name), m_parent(parent) {}
   descriptor *parent() { return m_parent; }
-  const std::string &get_name() const { return m_field_name; }
-  const std::list<std::unique_ptr<field>> &get_fields() const {
+  [[nodiscard]] virtual const std::type_info& get_typeinfo() const = 0;
+  [[nodiscard]] const std::string &get_name() const { return m_field_name; }
+  [[nodiscard]] const std::list<std::unique_ptr<field>> &get_fields() const {
     return m_fields;
   }
 };

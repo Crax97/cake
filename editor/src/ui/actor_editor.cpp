@@ -11,6 +11,7 @@
 
 #include "object/field_visitor.h"
 #include "object/field.h"
+#include "object/pointer_field.h"
 
 #include "imgui.h"
 #include "texture.h"
@@ -33,7 +34,8 @@ void draw_property(field *prop,
       class imgui_drawer : public field_visitor {
       public:
             field *m_prop;
-            explicit imgui_drawer(field *in_prop) : m_prop(in_prop) {}
+            spectacle::component* m_comp;
+            explicit imgui_drawer(field *in_prop, spectacle::component* in_comp) : m_prop(in_prop), m_comp(in_comp) {}
 
             void visit_bool_property(bool &value) override {
                 ImGui::Checkbox(m_prop->get_name().c_str(), &value);
@@ -61,13 +63,24 @@ void draw_property(field *prop,
             void visit_quat_property(glm::quat& q) override {
 
             }
+
+            void visit_pointer_property(pointer_field& ptr) override {
+                if(ptr.points_to<renderer::texture>()) {
+                    auto texture = ptr.get_ptr<renderer::texture>(m_comp);
+                    if(texture && texture->has_valid_texture()) {
+                        ImGui::Image(texture->get_texture_object(), ImVec2(512, 512));
+                    } else {
+                        ImGui::Text("No valid texture");
+                    }
+                }
+            }
             // void visit_texture_property(renderer::texture &value) {
               // ImGui::Text("%s", m_prop->get_property_name().c_str());
               // ImGui::SameLine();
               // ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
     };
 
-    auto drawer = imgui_drawer{prop};
+    auto drawer = imgui_drawer{prop, component};
     prop->visit(component, drawer);
 }
 

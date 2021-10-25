@@ -4,6 +4,9 @@ class %CLASSNAME%_descriptor : public descriptor{
   %CLASSNAME%_descriptor() : descriptor("%CLASSNAME%", nullptr) {
 %FIELDS%
     }
+    [[nodiscard]] const std::type_info& get_typeinfo() const override {
+        return typeid(%NAMESPACE%::%CLASSNAME%);
+    }
 };
 }
 

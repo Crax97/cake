@@ -85,7 +85,11 @@ public:
 
     public:
       location_field(transform Class::*field_ptr)
-          : field("location", get_type<transform>()), m_field_ptr(field_ptr) {}
+          : field("location"), m_field_ptr(field_ptr) {}
+
+    [[nodiscard]] const descriptor *get_field_descriptor() const override {
+          return get_descriptor_typed<glm::vec3>();
+      }
       virtual void *get_impl(void *base, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
                "Tried to get something with the wrong type!");
@@ -135,7 +139,10 @@ public:
 
     public:
       rotation_field(transform Class::*field_ptr)
-          : field("rotation", get_type<transform>()), m_field_ptr(field_ptr) {}
+          : field("rotation"), m_field_ptr(field_ptr) {}
+        [[nodiscard]] const descriptor *get_field_descriptor() const override {
+            return get_descriptor_typed<glm::quat>();
+        }
       virtual void *get_impl(void *base, const std::type_info &info) override {
         assert(typeid(glm::quat) == info &&
                "Tried to get something with the wrong type!");
@@ -185,7 +192,10 @@ public:
 
     public:
       scale_field(transform Class::*field_ptr)
-          : field("scale", get_type<transform>()), m_field_ptr(field_ptr) {}
+          : field("scale"), m_field_ptr(field_ptr) {}
+        [[nodiscard]] const descriptor *get_field_descriptor() const override {
+            return get_descriptor_typed<glm::vec3>();
+        }
       virtual void *get_impl(void *base, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
                "Tried to get something with the wrong type!");

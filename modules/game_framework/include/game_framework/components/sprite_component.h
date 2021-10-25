@@ -15,7 +15,7 @@ namespace gameframework {
 class REFLECT sprite_component : public rendering_component {
     GENERATE_REFLECT_BODY(sprite_component)
 private:
-  std::shared_ptr<renderer::texture> m_texture {nullptr};
+  std::shared_ptr<renderer::texture> REFLECT m_texture {nullptr};
   glm::vec2 REFLECT m_sprite_scale{1};
 
 public:
