@@ -10,14 +10,6 @@
 #include <string>
 #include <typeinfo>
 
-#define REFLECT
-
-#define GENERATE_REFLECT_BODY(Class)                                           \
-public:                                                                        \
-  friend class Class##_descriptor;                                             \
-  descriptor *get_descriptor() override;                                       \
-                                                                               \
-private:
 
 class object {
 public:

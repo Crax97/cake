@@ -4,6 +4,7 @@
 #include "transform.h"
 
 #include "object/object.h"
+#include "object/macros.h"
 
 #include <memory>
 #include <typeindex>
@@ -13,7 +14,7 @@
 namespace spectacle {
 class component;
 
-class REFLECT actor : public object {
+class REFLECT() actor : public object {
   GENERATE_REFLECT_BODY(actor)
     friend class stage;
 private:
@@ -21,11 +22,11 @@ private:
   std::unordered_map<std::type_index, std::shared_ptr<component>> m_components;
 
 protected:
-  transform REFLECT m_transform;
+  transform REFLECT() m_transform;
 
 public:
-  bool REFLECT is_enabled = true;
-  bool REFLECT tick_enabled = true;
+  bool REFLECT() is_enabled = true;
+  bool REFLECT() tick_enabled = true;
 
   // When this actor enters the scene
   virtual void begin_play() noexcept;

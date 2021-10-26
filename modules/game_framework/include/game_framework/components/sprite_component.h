@@ -4,6 +4,8 @@
 #include "rendering_component.h"
 #include "texture.h"
 
+#include "object/macros.h"
+
 #include <list>
 #include <memory>
 
@@ -12,11 +14,11 @@ class actor;
 }
 
 namespace gameframework {
-class REFLECT sprite_component : public rendering_component {
+class REFLECT() sprite_component : public rendering_component {
     GENERATE_REFLECT_BODY(sprite_component)
 private:
-  std::shared_ptr<renderer::texture> REFLECT m_texture {nullptr};
-  glm::vec2 REFLECT m_sprite_scale{1};
+  std::shared_ptr<renderer::texture> REFLECT() m_texture {nullptr};
+  glm::vec2 REFLECT() m_sprite_scale{1};
 
 public:
   explicit sprite_component(spectacle::actor &owner) noexcept;
