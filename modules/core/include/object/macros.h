@@ -12,6 +12,6 @@
 #define GENERATE_REFLECT_BODY(Class)                                           \
 public:                                                                        \
   friend class Class##_descriptor;                                             \
-  descriptor *get_descriptor() override;                                       \
+  descriptor *get_descriptor() const override;                                       \
 private:
 

@@ -10,7 +10,7 @@ class %CLASSNAME%_descriptor : public descriptor{
 };
 }
 
-descriptor* %NAMESPACE%::%CLASSNAME%::get_descriptor() {
+descriptor* %NAMESPACE%::%CLASSNAME%::get_descriptor() const {
   static %NAMESPACE%::%CLASSNAME%_descriptor desc;
   return &desc;
 }

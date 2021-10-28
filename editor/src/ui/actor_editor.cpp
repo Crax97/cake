@@ -74,6 +74,9 @@ void draw_property(field *prop,
                     }
                 }
             }
+            void visit_container_property(container_field& container) override {
+                std::cout << "container" << "\n";
+            }
             // void visit_texture_property(renderer::texture &value) {
               // ImGui::Text("%s", m_prop->get_property_name().c_str());
               // ImGui::SameLine();

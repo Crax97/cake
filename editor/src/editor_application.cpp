@@ -135,16 +135,21 @@ void editor_application::on_app_update() noexcept {
           inputsystem::keyboard_key::F8)) {
     m_show_demo = !m_show_demo;
   }
-
-  if (inputsystem::inputsystem::is_button_just_pressed(
-          inputsystem::keyboard_key::F4)) {
+if (inputsystem::inputsystem::is_button_just_pressed(
+        inputsystem::keyboard_key::F4)) {
     auto selected_actor = m_actor_editor.get_selected_actor();
     if (selected_actor) {
-      string_serializer ser;
-      selected_actor->serialize(ser);
-      std::cout << ser.get_str();
+        string_serializer ser;
+        selected_actor->serialize(ser);
+        std::cout << ser.get_str();
     }
-  }
+}
+if (inputsystem::inputsystem::is_button_just_pressed(
+        inputsystem::keyboard_key::F5)) {
+    string_serializer ser;
+    m_stage->serialize(ser);
+    std::cout << ser.get_str();
+}
 }
 
 void editor_application::render_world() noexcept {

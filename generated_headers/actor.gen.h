@@ -20,7 +20,7 @@ class actor_descriptor : public descriptor{
 };
 }
 
-descriptor* spectacle::actor::get_descriptor() {
+descriptor* spectacle::actor::get_descriptor() const  {
   static spectacle::actor_descriptor desc;
   return &desc;
 }

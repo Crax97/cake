@@ -19,7 +19,7 @@ class sprite_component_descriptor : public descriptor{
 };
 }
 
-descriptor* gameframework::sprite_component::get_descriptor() {
+descriptor* gameframework::sprite_component::get_descriptor() const  {
   static gameframework::sprite_component_descriptor desc;
   return &desc;
 }

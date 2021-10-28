@@ -48,6 +48,7 @@ DEFINE_DO_VISIT(glm::vec2, visit_vec2_property)
 DEFINE_DO_VISIT(glm::vec3, visit_vec3_property)
 DEFINE_DO_VISIT(glm::vec4, visit_vec4_property)
 DEFINE_DO_VISIT(class pointer_field, visit_pointer_property)
+DEFINE_DO_VISIT(class container_field, visit_container_property)
 
 
 class field {

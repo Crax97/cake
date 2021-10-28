@@ -3,11 +3,15 @@
 #include <list>
 #include <memory>
 
+#include "object/object.h"
+#include "object/macros.h"
+
 namespace spectacle {
 class actor;
-class stage {
+class REFLECT() stage : public object {
+    GENERATE_REFLECT_BODY(stage)
 private:
-  std::list<std::shared_ptr<actor>> m_actor_list;
+  std::vector<std::shared_ptr<actor>> REFLECT() m_actor_list;
 
 public:
   // Called before everything else
@@ -19,7 +23,7 @@ public:
   // Called when the stage needs to release its resources
   virtual void on_stage_exit() noexcept;
 
-  std::list<std::shared_ptr<actor>> &get_all_actors() noexcept {
+  std::vector<std::shared_ptr<actor>> &get_all_actors() noexcept {
     return m_actor_list;
   }
 

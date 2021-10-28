@@ -1,6 +1,10 @@
 #include "game_framework/stage.h"
 #include "game_framework/actor.h"
+#include "object/serializer.h"
+
 #include "utils.h"
+
+#include "stage.gen.h"
 
 template <spectacle::detail::Iterable It,
           std::invocable<spectacle::actor &> Functor>
