@@ -75,7 +75,7 @@ class field_adder<Class, std::shared_ptr<T>> {
         }
 
         void visit(void *base, field_visitor &visitor) override {
-            visitor.visit_pointer_property(*this);
+            do_visit<pointer_field>(*this, visitor);
         }
 
         ~class_field() override = default;

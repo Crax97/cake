@@ -3,6 +3,7 @@
 
 #include "object/descriptor.h"
 #include "object/object.h"
+#include "object/pointer_field.h"
 
 namespace spectacle {
 class actor_descriptor : public descriptor{

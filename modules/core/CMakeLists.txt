@@ -3,8 +3,8 @@ project(gameframework CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(CORE_SOURCES 
-    src/field.cpp
+set(CORE_SOURCES
+        src/field.cpp
     src/std_extensions.cpp
 )
 add_library(core STATIC ${CORE_SOURCES})

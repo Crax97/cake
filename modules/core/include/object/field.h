@@ -12,7 +12,9 @@
 #include "field_visitor.h"
 #include "glm/gtc/quaternion.hpp"
 
-
+// If you're reaching this with Type = std::shared_ptr<T>
+// please ensure you're including pointer_field.h before calling
+// field_adder<Class, std::shared_ptr>
 template <typename Type> void do_visit(Type &value, field_visitor &visitor) {
   assert(false && "NOT REACHED");
 }

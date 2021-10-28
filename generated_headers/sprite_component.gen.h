@@ -3,6 +3,7 @@
 
 #include "object/descriptor.h"
 #include "object/object.h"
+#include "object/pointer_field.h"
 
 namespace gameframework {
 class sprite_component_descriptor : public descriptor{
