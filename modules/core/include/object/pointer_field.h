@@ -34,8 +34,8 @@ class field_adder<Class, std::shared_ptr<T>> {
 
         Class &get_self(void *base) { return *static_cast<Class *>(base); }
 
-        const Class &get_self(void *base) const {
-            return *static_cast<Class *>(base);
+        const Class &get_self(const void *base) const {
+            return *static_cast<const Class *>(base);
         }
 
     public:
@@ -65,7 +65,7 @@ class field_adder<Class, std::shared_ptr<T>> {
             return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
         }
 
-        virtual std::string to_string(void *base) const noexcept override {
+        virtual std::string to_string(const void *base) const noexcept override {
             return "pointer";
         }
 

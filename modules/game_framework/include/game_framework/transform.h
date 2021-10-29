@@ -78,9 +78,9 @@ public:
     class location_field : public field {
       transform Class::*m_field_ptr;
 
-      Class &get_self(void *base) { return *static_cast<Class *>(base); }
-      const Class &get_self(void *base) const {
-        return *static_cast<Class *>(base);
+        Class &get_self(void *base) { return *static_cast<Class *>(base); }
+      const Class &get_self(const void *base) const {
+        return *static_cast<const Class *>(base);
       }
 
     public:
@@ -106,8 +106,8 @@ public:
         return reinterpret_cast<const void *>(&my_transform.m_location);
       }
 
-      virtual std::string to_string(void *base) const noexcept override {
-        auto &my_transform = get_self(base).*m_field_ptr;
+      virtual std::string to_string(const void *base) const noexcept override {
+        const auto &my_transform = get_self(base).*m_field_ptr;
         return std::to_string(my_transform.m_location);
       }
       virtual void set_from_string(void *base,
@@ -133,8 +133,8 @@ public:
       transform Class::*m_field_ptr;
 
       Class &get_self(void *base) { return *static_cast<Class *>(base); }
-      const Class &get_self(void *base) const {
-        return *static_cast<Class *>(base);
+      const Class &get_self(const void *base) const {
+        return *static_cast<const Class*>(base);
       }
 
     public:
@@ -159,8 +159,8 @@ public:
         return reinterpret_cast<const void *>(&my_transform.m_rotation);
       }
 
-      virtual std::string to_string(void *base) const noexcept override {
-        auto &my_transform = get_self(base).*m_field_ptr;
+      virtual std::string to_string(const void *base) const noexcept override {
+        const auto &my_transform = get_self(base).*m_field_ptr;
         return std::to_string(glm::eulerAngles(my_transform.m_rotation));
       }
       virtual void set_from_string(void *base,
@@ -186,8 +186,8 @@ public:
       transform Class::*m_field_ptr;
 
       Class &get_self(void *base) { return *static_cast<Class *>(base); }
-      const Class &get_self(void *base) const {
-        return *static_cast<Class *>(base);
+      const Class &get_self(const void *base) const {
+        return *static_cast<const Class *>(base);
       }
 
     public:
@@ -212,8 +212,8 @@ public:
         return reinterpret_cast<const void *>(&my_transform.m_scale);
       }
 
-      virtual std::string to_string(void *base) const noexcept override {
-        auto &my_transform = get_self(base).*m_field_ptr;
+      virtual std::string to_string(const void *base) const noexcept override {
+        const auto &my_transform = get_self(base).*m_field_ptr;
         return std::to_string(my_transform.m_scale);
       }
       virtual void set_from_string(void *base,

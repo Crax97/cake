@@ -75,7 +75,7 @@ public:
     return *static_cast<T *>(get_impl(base, typeid(T)));
   }
 
-  virtual std::string to_string(void *base) const noexcept = 0;
+  virtual std::string to_string(const void *base) const noexcept = 0;
   virtual void set_from_string(void *base,
                                const std::string &value) noexcept = 0;
   virtual void visit(void *base, field_visitor &visitor) = 0;
@@ -90,8 +90,8 @@ class field_adder {
 
             Class &get_self(void *base) { return *static_cast<Class *>(base); }
 
-            const Class &get_self(void *base) const {
-                return *static_cast<Class *>(base);
+            const Class &get_self(const void *base) const {
+                return *static_cast<const Class *>(base);
             }
 
         public:
@@ -118,7 +118,7 @@ class field_adder {
                 return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
             }
 
-            virtual std::string to_string(void *base) const noexcept override {
+            virtual std::string to_string(const void *base) const noexcept override {
                 return std::to_string(get_self(base).*m_field_ptr);
             }
 

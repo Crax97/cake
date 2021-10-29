@@ -10,18 +10,25 @@ private:
   int tabs = 0;
 
 public:
-  virtual void begin_class(const descriptor &desc, void *base) override {
-    output << "\"" << desc.get_name() << "\": {\n";
-    tabs++;
-  }
-  virtual void serialize_field(const field &desc, void *base) override {
-    output << std::string("\t", tabs) << "\"" << desc.get_name() << "\": \""
-           << desc.to_string(base) << "\",\n";
-  }
-  virtual void end_class(const descriptor &desc, void *base) override {
-    tabs--;
-    output << "}\n";
-  }
 
-  std::string get_str() const { return output.str(); }
+    void begin() override {
+        output << "{\n";
+        tabs ++;
+    }
+    void begin_section(std::string_view section_name) override {
+        output << std::string(tabs, '\t') << '"' << section_name << '"' << " : {\n";
+        tabs++;
+    }
+    void add_parameter(std::string_view param_name, std::string_view value) override {
+        output << std::string(tabs, '\t') << '"' << param_name << '"' << " : " << value << ",\n";
+    }
+    void end_section(std::string_view section_name) override {
+        tabs --;
+        output << std::string(tabs, '\t') << "},\n";
+    }
+    void end() override {
+        tabs --;
+        output << "}";
+    }
+    std::string get_str() const { return output.str(); }
 };

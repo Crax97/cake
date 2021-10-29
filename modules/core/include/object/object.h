@@ -14,12 +14,12 @@
 class object {
 public:
   [[nodiscard]] virtual descriptor *get_descriptor() const = 0;
-  virtual void serialize(class serializer &serializer) {
-    serializer.begin_class(*get_descriptor(), this);
+  virtual void serialize(class serializer &serializer) const {
+    serializer.begin_section("actor");
     for (auto &field : get_descriptor()->get_fields()) {
-      serializer.serialize_field(*field, this);
+      serializer.add_parameter(field->get_name(), field->to_string(this));
     }
-    serializer.end_class(*get_descriptor(), this);
+    serializer.end_section("actor");
   }
 
   [[nodiscard]] virtual std::string to_string() const;

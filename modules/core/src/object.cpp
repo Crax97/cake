@@ -3,23 +3,14 @@
 //
 
 #include <object/object.h>
+#include "serializers/string_serializer.h"
 #include "object/field.h"
 
 std::string object::to_string() const {
-        auto* tthis = this;
-        std::stringstream stream;
-        std::string class_name = get_descriptor()->get_name();
-        stream << class_name << " @0x" << std::hex << *reinterpret_cast<size_t*>(&tthis) << std::dec << "\n";
-        auto& fields = get_descriptor()->get_fields();
-        if(!fields.empty()) {
-            stream << "{\n";
-            for(const auto& field : fields) {
-                stream << "\t" << field->get_name() << " : " << field->to_string(static_cast<void*>(const_cast<object*>(this))) << "\n";
-            }
-            stream << "}";
-        }
-        return stream.str();
-    }
+    string_serializer ser;
+    this->serialize(ser);
+    return ser.get_str();
+}
 
 std::ostream &operator<<(std::ostream &stream, const object& obj) {
     stream << obj.to_string();
