@@ -119,7 +119,7 @@ class field_adder {
             }
 
             virtual std::string to_string(void *base) const noexcept override {
-                return "TODO pointer lol";
+                return std::to_string(get_self(base).*m_field_ptr);
             }
 
             virtual void set_from_string(void *base,

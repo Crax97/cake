@@ -1,8 +1,8 @@
 #pragma once
 
 #include "descriptor.h"
-#include "field.h"
 #include "serializer.h"
+#include "fields.h"
 #include <cassert>
 
 #include <list>
