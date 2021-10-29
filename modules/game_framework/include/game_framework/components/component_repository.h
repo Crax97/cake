@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "object/field.h"
+
 namespace spectacle {
 class component;
 class actor;

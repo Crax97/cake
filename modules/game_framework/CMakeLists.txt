@@ -9,6 +9,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/components/component_repository.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/rendering_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/sprite_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/texture_loader.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/resources/texture_resource.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/actor.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp

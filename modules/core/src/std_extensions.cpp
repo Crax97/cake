@@ -1,5 +1,7 @@
 #include "extensions/std_extensions.h"
 
+#include "object/object.h"
+#include "object/fields.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
@@ -57,6 +59,10 @@ template <> glm::vec4 from_string(const std::string &val) {
 template <> glm::quat from_string(const std::string &val) {
   auto vec = from_string<glm::vec4>(val);
   return glm::quat(vec);
+}
+
+std::string to_string(const object &obj) {
+    return obj.to_string();
 }
 
 std::string to_string(const glm::vec2 &vec) {

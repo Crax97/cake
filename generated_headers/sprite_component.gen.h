@@ -3,7 +3,7 @@
 
 #include "object/descriptor.h"
 #include "object/object.h"
-#include "object/pointer_field.h"
+#include "object/fields.h"
 
 namespace gameframework {
 class sprite_component_descriptor : public descriptor{
@@ -19,7 +19,7 @@ class sprite_component_descriptor : public descriptor{
 };
 }
 
-descriptor* gameframework::sprite_component::get_descriptor() const  {
+descriptor* gameframework::sprite_component::get_descriptor() const {
   static gameframework::sprite_component_descriptor desc;
   return &desc;
 }

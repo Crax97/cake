@@ -12,6 +12,15 @@ std::string object::to_string() const {
     return ser.get_str();
 }
 
+void object::serialize(serializer &serializer) const  {
+    serializer.begin_section("actor");
+    for (auto &field : get_descriptor()->get_fields()) {
+        serializer.add_parameter(field->get_name(), field->to_string(this));
+    }
+    serializer.end_section("actor");
+}
+
+
 std::ostream &operator<<(std::ostream &stream, const object& obj) {
     stream << obj.to_string();
     return stream;

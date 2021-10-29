@@ -3,8 +3,7 @@
 
 #include "object/descriptor.h"
 #include "object/object.h"
-#include "object/pointer_field.h"
-#include "object/container_field.h"
+#include "object/fields.h"
 
 namespace spectacle {
 class stage_descriptor : public descriptor{

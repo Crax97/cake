@@ -1,36 +1,39 @@
 //
-// Created by crax on 10/26/21.
+// Created by crax on 10/30/21.
 //
+
 #pragma once
 
-#include "field.h"
-#include "descriptor.h"
+#include "object/object.h"
+#include "object/field.h"
+#include "object/macros.h"
 
-#include <memory>
-#include <cassert>
+#include <string_view>
+#include <typeinfo>
 
-class pointer_field : public field {
+class resource : public object {
+GENERATE_REFLECT_BODY(resource)
+protected:
 public:
-    explicit pointer_field(const std::string& name)
-        : field(name) { }
-    [[nodiscard]] virtual const descriptor* get_inner_type() const = 0;
+    [[nodiscard]] std::string to_string() const override = 0;
+    virtual void from_string(std::string_view str) = 0;
     template<typename T>
-    [[nodiscard]] bool points_to() const {
-        return typeid(T) == get_inner_type()->get_typeinfo();
+    bool is_resource() {
+        return typeid(*this) == typeid(T);
     }
 
     template<typename T>
-    std::shared_ptr<T> get_ptr(void* base) {
-        assert(points_to<T>());
-        return get<std::shared_ptr<T>>(base);
+    T& get() {
+        assert(is_resource<T>());
+        return *reinterpret_cast<T*>(this);
     }
 };
 
-template<typename Class, is_object T>
-class field_adder<Class, std::shared_ptr<T>> {
-    using pointer_type = std::shared_ptr<T>;
-    class class_field : public pointer_field {
-        std::shared_ptr<T> Class::*m_field_ptr;
+
+template<typename Class>
+class field_adder<Class, resource> {
+    class class_field : public field {
+        resource Class::*m_field_ptr;
 
         Class &get_self(void *base) { return *static_cast<Class *>(base); }
 
@@ -39,11 +42,11 @@ class field_adder<Class, std::shared_ptr<T>> {
         }
 
     public:
-        class_field(const std::string& field_name, pointer_type Class::*field_ptr)
-                : pointer_field(field_name), m_field_ptr(field_ptr) {}
+        class_field(const std::string& field_name, resource Class::*field_ptr)
+                : field(field_name), m_field_ptr(field_ptr) {}
 
         virtual void *get_impl(void *base, const std::type_info &info) override {
-            assert(typeid(pointer_type) == info &&
+            assert(get_descriptor_typed<resource>()->get_typeinfo() == info &&
                    "Tried to get something with the wrong type!");
             assert(base != nullptr && "Tried to get a property from a null");
             return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
@@ -51,38 +54,35 @@ class field_adder<Class, std::shared_ptr<T>> {
 
 
         [[nodiscard]] const descriptor *get_field_descriptor() const override {
-            return get_descriptor_typed<T>();
-        }
-        [[nodiscard]] const descriptor *get_inner_type() const override {
-            return get_descriptor_typed<T>();
+            return get_descriptor_typed<resource>();
         }
 
         virtual const void *get_impl(void *base,
                                      const std::type_info &info) const override {
-            assert(typeid(pointer_type) == info &&
+            assert(get_descriptor_typed<resource>()->get_typeinfo() == info &&
                    "Tried to get something with the wrong type!");
             assert(base != nullptr && "Tried to get a property from a null");
             return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
         }
 
         virtual std::string to_string(const void *base) const noexcept override {
-            return "pointer";
+            return get_self(base).to_string();
         }
 
         virtual void set_from_string(void *base,
                                      const std::string &value) noexcept override {
-            // get_self(base).*m_field_ptr = std::from_string<Type>(value);
+            get_self(base).from_string(value);
         }
 
         void visit(void *base, field_visitor &visitor) override {
-            do_visit<pointer_field>(*this, visitor);
+            do_visit<resource>(*this, visitor);
         }
 
         ~class_field() override = default;
     };
 public:
     void operator()(
-            std::list<std::unique_ptr<field>> &fields, const std::string &member_name, pointer_type Class::* ptr) {
+            std::list<std::unique_ptr<field>> &fields, const std::string &member_name, resource Class::* ptr) {
         fields.emplace_back(std::make_unique<class_field>(member_name, ptr));
     }
 };

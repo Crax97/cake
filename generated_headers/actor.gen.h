@@ -3,7 +3,7 @@
 
 #include "object/descriptor.h"
 #include "object/object.h"
-#include "object/pointer_field.h"
+#include "object/fields.h"
 
 namespace spectacle {
 class actor_descriptor : public descriptor{
@@ -20,7 +20,7 @@ class actor_descriptor : public descriptor{
 };
 }
 
-descriptor* spectacle::actor::get_descriptor() const  {
+descriptor* spectacle::actor::get_descriptor() const {
   static spectacle::actor_descriptor desc;
   return &desc;
 }

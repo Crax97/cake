@@ -3,15 +3,14 @@
 #include "editor_application.h"
 #include "game_framework/component.h"
 #include "game_framework/components/component_repository.h"
+#include "game_framework/resources/texture_resource.h"
 
 #include "game_framework/actor.h"
 #include "game_framework/stage.h"
 #include "glm/gtc/quaternion.hpp"
 #include "graphics_api.h"
 
-#include "object/field_visitor.h"
-#include "object/field.h"
-#include "object/pointer_field.h"
+#include "object/fields.h"
 
 #include "imgui.h"
 #include "texture.h"
@@ -62,6 +61,16 @@ void draw_property(field *prop,
             }
             void visit_quat_property(glm::quat& q) override {
 
+            }
+            void visit_resource_property(class resource& res) override {
+                if(res.is_resource<game_framework::texture_resource>()) {
+                    auto& texture_res = res.get<game_framework::texture_resource>();
+                    if(texture_res) {
+                        ImGui::Image(texture_res.get_texture()->get_texture_object(), ImVec2(100, 100));
+                    } else {
+                        ImGui::Text("No valid texture");
+                    }
+                }
             }
 
             void visit_pointer_property(pointer_field& ptr) override {

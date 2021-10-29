@@ -6,6 +6,7 @@
 #include <typeinfo>
 #include <list>
 #include <utility>
+#include <type_traits>
 
 #include "descriptor.h"
 #include "extensions/std_extensions.h"
@@ -15,9 +16,7 @@
 // If you're reaching this with Type = std::shared_ptr<T>
 // please ensure you're including pointer_field.h before calling
 // field_adder<Class, std::shared_ptr>
-template <typename Type> void do_visit(Type &value, field_visitor &visitor) {
-  assert(false && "NOT REACHED");
-}
+template <typename Type> void do_visit(Type &value, field_visitor &visitor);
 
 #define DECL_TYPE_INFO(Type)                                                        \
 template <> descriptor *get_descriptor_typed<Type>() {                              \
@@ -49,6 +48,7 @@ DEFINE_DO_VISIT(glm::vec3, visit_vec3_property)
 DEFINE_DO_VISIT(glm::vec4, visit_vec4_property)
 DEFINE_DO_VISIT(class pointer_field, visit_pointer_property)
 DEFINE_DO_VISIT(class container_field, visit_container_property)
+DEFINE_DO_VISIT(class resource, visit_resource_property)
 
 
 class field {
@@ -80,7 +80,7 @@ public:
                                const std::string &value) noexcept = 0;
   virtual void visit(void *base, field_visitor &visitor) = 0;
 
-  virtual ~field()= default;;
+  virtual ~field()= default;
 };
 
 template <typename Class, typename Type>
@@ -140,3 +140,16 @@ public:
             fields.emplace_back(std::make_unique<class_field>(member_name, ptr));
         }
 };
+
+
+template<typename T>
+concept is_stringable_val = requires(T t) {
+    {t.to_string()};
+};
+template<typename T>
+concept is_stringable_ptr = requires(T t) {
+    {t->to_string()};
+};
+
+template<typename T>
+concept is_object = (is_stringable_ptr<T> || is_stringable_val<T>);
