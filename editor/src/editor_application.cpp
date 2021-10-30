@@ -17,14 +17,14 @@
 #include "input/inputsystem.h"
 #include "input/keys.h"
 #include "mesh.h"
-#include "texture.h"
-#include "ui/sidebar.h"
+#include "ui/dialogs.h"
 #include "window.h"
 
 #include <iostream>
 #include <memory>
 #include <string>
 #include <fstream>
+#include <game_framework/loaders/stage_deserializer.h>
 
 using namespace std::string_literals;
 
@@ -41,10 +41,33 @@ void editor_application::on_new_level() noexcept {
   m_stage = std::make_unique<spectacle::stage>();
   m_level_is_dirty = false;
 }
-void editor_application::on_load_request() noexcept {}
+
+void editor_application::on_load_request() noexcept {
+    auto level_load_path = editor::dialogs::file_picker("Open stage", {"*.stage"}, ".", "Miku stage file", false);
+    if(!level_load_path) {
+        return;
+    }
+    std::fstream input_level;
+    input_level.open(level_load_path.value().c_str(), std::ios::in);
+    if(input_level.bad()) {
+        // Log level file opening errored
+        return;
+    }
+    auto deserializer = gameframework::stage_deserializer();
+    deserializer.deserialize(input_level);
+    if(deserializer.good()) {
+        on_new_level();
+        m_stage = std::move(deserializer.get_stage());
+    }
+}
 void editor_application::on_save_request() noexcept {
+    auto level_save_path = editor::dialogs::save_file("Save stage", {".stage"}, "./level.stage", "Miku stage file");
+    if(!level_save_path) {
+        return;
+    }
+
     std::fstream output_level;
-    output_level.open("level.cstage", std::ios::out | std::ios::trunc);
+    output_level.open(level_save_path->c_str(), std::ios::out | std::ios::trunc);
     gameframework::stage_serializer serializer(output_level);
     serializer.begin();
     m_stage->serialize(serializer);

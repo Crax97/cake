@@ -4,7 +4,8 @@ project(editor CXX)
 set(EDITOR_SOURCE_FILES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/editor_application.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/sidebar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/sidebar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/dialogs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/actor_editor.cpp
 )
 set(EDITOR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -21,4 +22,5 @@ target_link_libraries(editor
     gameframework
     core
     thirdparty_imgui
+    tinyfiledialogs
 )

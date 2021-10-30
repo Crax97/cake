@@ -3,6 +3,7 @@
 #include <cassert>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 
 class field;
@@ -21,9 +22,10 @@ public:
   descriptor *parent() { return m_parent; }
   [[nodiscard]] virtual const std::type_info& get_typeinfo() const = 0;
   [[nodiscard]] const std::string &get_name() const { return m_field_name; }
-  [[nodiscard]] const std::list<std::unique_ptr<field>> &get_fields() const {
-    return m_fields;
-  }
+    [[nodiscard]] const std::list<std::unique_ptr<field>> &get_fields() const {
+        return m_fields;
+    }
+    [[nodiscard]] std::optional<field*> find_field(std::string_view field_name) const;
 };
 
 template <typename T> descriptor *get_descriptor_typed() {

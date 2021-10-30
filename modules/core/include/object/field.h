@@ -85,55 +85,65 @@ public:
 
 template <typename Class, typename Type>
 class field_adder {
-        class class_field : public field {
-            Type Class::*m_field_ptr;
+    class class_field : public field {
+        Type Class::*m_field_ptr;
 
-            Class &get_self(void *base) { return *static_cast<Class *>(base); }
+        Class &get_self(void *base) { return *static_cast<Class *>(base); }
 
-            const Class &get_self(const void *base) const {
-                return *static_cast<const Class *>(base);
+        const Class &get_self(const void *base) const {
+            return *static_cast<const Class *>(base);
+        }
+
+    public:
+        class_field(std::string field_name, Type Class::*field_ptr)
+                : field(field_name), m_field_ptr(field_ptr) {}
+
+        virtual void *get_impl(void *base, const std::type_info &info) override {
+            assert(typeid(Type) == info &&
+                   "Tried to get something with the wrong type!");
+            assert(base != nullptr && "Tried to get a property from a null");
+            return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
+        }
+
+
+        [[nodiscard]] const descriptor *get_field_descriptor() const override {
+            return get_descriptor_typed<Type>();
+        }
+
+        virtual const void *get_impl(void *base,
+                                     const std::type_info &info) const override {
+            assert(typeid(Type) == info &&
+                   "Tried to get something with the wrong type!");
+            assert(base != nullptr && "Tried to get a property from a null");
+            return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
+        }
+
+        virtual std::string to_string(const void *base) const noexcept override {
+            auto& self = get_self(base).*m_field_ptr;
+            if constexpr(std::is_base_of_v<resource, Type>) {
+                return self.to_string();
+            } else {
+                return std::to_string(self);
             }
+        }
 
-        public:
-            class_field(std::string field_name, Type Class::*field_ptr)
-                    : field(field_name), m_field_ptr(field_ptr) {}
-
-            virtual void *get_impl(void *base, const std::type_info &info) override {
-                assert(typeid(Type) == info &&
-                       "Tried to get something with the wrong type!");
-                assert(base != nullptr && "Tried to get a property from a null");
-                return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
+        virtual void set_from_string(void *base,
+                                     const std::string &value) noexcept override {
+            auto& self = get_self(base).*m_field_ptr;
+            if constexpr(std::is_base_of_v<resource, Type>) {
+                self.from_string(value);
+            } else {
+                self = std::from_string<Type>(value);
             }
+        }
 
+        virtual void visit(void *base, field_visitor &visitor) override {
+            Type &ref = get_self(base).*m_field_ptr;
+            return do_visit<Type>(ref, visitor);
+        }
 
-            [[nodiscard]] const descriptor *get_field_descriptor() const override {
-                return get_descriptor_typed<Type>();
-            }
-
-            virtual const void *get_impl(void *base,
-                                         const std::type_info &info) const override {
-                assert(typeid(Type) == info &&
-                       "Tried to get something with the wrong type!");
-                assert(base != nullptr && "Tried to get a property from a null");
-                return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
-            }
-
-            virtual std::string to_string(const void *base) const noexcept override {
-                return std::to_string(get_self(base).*m_field_ptr);
-            }
-
-            virtual void set_from_string(void *base,
-                                         const std::string &value) noexcept override {
-                get_self(base).*m_field_ptr = std::from_string<Type>(value);
-            }
-
-            virtual void visit(void *base, field_visitor &visitor) override {
-                Type &ref = get_self(base).*m_field_ptr;
-                return do_visit<Type>(ref, visitor);
-            }
-
-            ~class_field() {}
-        };
+        ~class_field() {}
+    };
 public:
         void operator()(
                 std::list<std::unique_ptr<field>> &fields, const std::string &member_name, Type Class::* ptr) {

@@ -12,6 +12,8 @@
 
 #include "object/fields.h"
 
+#include "ui/dialogs.h"
+
 #include "imgui.h"
 #include "texture.h"
 
@@ -73,8 +75,10 @@ void draw_property(field *prop,
                 }
                 ImGui::SameLine();
                 if(ImGui::Button("Change Resource"))  {
-                    // auto res_path = open_res_path_dialog();
-                    // res.from_string(res_path.string());
+                    auto resource_path = editor::dialogs::file_picker("Pick Resource", {"*.png", "*.jpg"}, ".", "Texture Resource", false);
+                    if(resource_path) {
+                        res.from_string(resource_path.value().string());
+                    }
                 }
             }
 

@@ -5,3 +5,6 @@
 	path = thirdparty/imgui
 	url = git@github.com:ocornut/imgui.git
 	branch = docking
+[submodule "thirdparty/tinyfiledialogs"]
+	path = thirdparty/tinyfiledialogs
+	url = git://git.code.sf.net/p/tinyfiledialogs/code

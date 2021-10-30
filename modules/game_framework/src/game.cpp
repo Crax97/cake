@@ -11,8 +11,8 @@
 
 gameframework::game *g_game{nullptr};
 
-using SpriteComponent = gameframework::sprite_component;
-DEFINE_COMPONENT_REGISTRATOR(SpriteComponent)
+using sprite_component = gameframework::sprite_component;
+DEFINE_COMPONENT_REGISTRATOR(sprite_component)
 
 gameframework::game::game(int argc, char **argv)
     : app_framework::application(argc, argv) {

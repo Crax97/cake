@@ -6,6 +6,7 @@ set(CORE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(CORE_SOURCES
         src/field.cpp
         src/object.cpp
+        src/descriptor.cpp
         src/resource.cpp
     src/std_extensions.cpp
 )

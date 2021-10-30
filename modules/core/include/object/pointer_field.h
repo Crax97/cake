@@ -66,12 +66,19 @@ class field_adder<Class, std::shared_ptr<T>> {
         }
 
         virtual std::string to_string(const void *base) const noexcept override {
-            return "pointer";
+            auto ptr = get_self(base).*m_field_ptr;
+            if(ptr) {
+                return ptr->to_string();
+            }
+            return "null";
         }
 
         virtual void set_from_string(void *base,
                                      const std::string &value) noexcept override {
-            // get_self(base).*m_field_ptr = std::from_string<Type>(value);
+            auto ptr = get_self(base).*m_field_ptr;
+            if(ptr) {
+                ptr->from_string(value);
+            }
         }
 
         void visit(void *base, field_visitor &visitor) override {

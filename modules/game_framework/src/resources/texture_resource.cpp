@@ -11,4 +11,5 @@ void game_framework::texture_resource::from_string(std::string_view str)  {
     if(texture_loaded) {
         m_texture = std::move(texture_loaded.value());
     }
+    m_path = str;
 }

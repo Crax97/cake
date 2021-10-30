@@ -10,7 +10,8 @@
 
 
 gameframework::sprite_component::sprite_component(spectacle::actor &owner) noexcept
-    : rendering_component(owner) { }
+    : rendering_component(owner) {
+}
 
 
 void gameframework::sprite_component::draw(
