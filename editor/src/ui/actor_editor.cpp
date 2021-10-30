@@ -82,7 +82,7 @@ void draw_property(field *prop,
                 }
             }
 
-            void visit_pointer_property(pointer_field& ptr) override {
+            void visit_pointer_property(pointer_field_base& ptr) override {
                 if(ptr.points_to<renderer::texture>()) {
                     auto texture = ptr.get_ptr<renderer::texture>(m_comp);
                     if(texture && texture->has_valid_texture()) {

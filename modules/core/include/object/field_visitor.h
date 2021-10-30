@@ -16,6 +16,6 @@ public:
   virtual void visit_vec4_property(glm::vec4 &value) = 0;
   virtual void visit_quat_property(glm::quat &value) = 0;
   virtual void visit_resource_property(class resource& res) = 0;
-  virtual void visit_pointer_property(class pointer_field& field) = 0;
+  virtual void visit_pointer_property(class pointer_field_base& field) = 0;
   virtual void visit_container_property(class container_field& field) = 0;
 };

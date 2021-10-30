@@ -6,5 +6,3 @@
 
 #include "object/field.h"
 #include "object/resource.h"
-#include "object/pointer_field.h"
-#include "object/container_field.h"
