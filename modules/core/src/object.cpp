@@ -13,11 +13,11 @@ std::string object::to_string() const {
 }
 
 void object::serialize(serializer &serializer) const  {
-    serializer.begin_section("actor");
+    serializer.begin_section(get_descriptor()->get_name());
     for (auto &field : get_descriptor()->get_fields()) {
         serializer.add_parameter(field->get_name(), field->to_string(this));
     }
-    serializer.end_section("actor");
+    serializer.end_section(get_descriptor()->get_name());
 }
 
 

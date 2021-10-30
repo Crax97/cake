@@ -32,7 +32,7 @@ public:
   }
 
   void add_new_actor(std::shared_ptr<actor> new_actor) noexcept;
-
+  void serialize(class serializer &serializer) const override;
   virtual ~stage() = default;
 };
 } // namespace spectacle

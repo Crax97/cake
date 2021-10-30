@@ -7,6 +7,7 @@
 #include "descriptor.h"
 
 #include <vector>
+#include <unordered_map>
 #include <cassert>
 
 namespace detail {
@@ -75,7 +76,7 @@ class field_adder<Class, std::vector<T>> {
         class_field(const std::string& field_name, vector_type Class::*field_ptr)
                 : container_field(field_name), m_field_ptr(field_ptr) {}
 
-        virtual void *get_impl(void *base, const std::type_info &info) override {
+        void *get_impl(void *base, const std::type_info &info) override {
             assert(typeid(vector_type) == info &&
                    "Tried to get something with the wrong type!");
             assert(base != nullptr && "Tried to get a property from a null");
@@ -90,7 +91,7 @@ class field_adder<Class, std::vector<T>> {
             return get_descriptor_typed<T>();
         }
 
-        virtual const void *get_impl(void *base,
+        const void *get_impl(void *base,
                                      const std::type_info &info) const override {
             assert(typeid(vector_type) == info &&
                    "Tried to get vector_type with the wrong type!");
@@ -98,7 +99,7 @@ class field_adder<Class, std::vector<T>> {
             return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
         }
 
-        virtual std::string to_string(const void *base) const noexcept override {
+        std::string to_string(const void *base) const noexcept override {
             std::stringstream str;
             str << "[ ";
             auto& inner_vec = get_field(base);
@@ -113,7 +114,7 @@ class field_adder<Class, std::vector<T>> {
             return str.str();
         }
 
-        virtual void set_from_string(void *base,
+        void set_from_string(void *base,
                                      const std::string &value) noexcept override {
             // get_self(base).*m_field_ptr = std::from_string<Type>(value);
         }

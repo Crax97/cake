@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include "object/serializer.h"
+
 /*
 scene file grammar
 scene_decl = "scene" [
@@ -25,8 +27,16 @@ word = // any combination of alphanumeric characters, beginning with a letter
 */
 
 namespace gameframework {
-    class scene_loader {
+    class stage_serializer : public serializer {
     private:
+        std::ostream& m_stream;
+        int m_tabs = 0;
     public:
+        explicit stage_serializer(std::ostream& stream) : m_stream(stream) { }
+        void begin() override;
+        void begin_section(std::string_view section_name) override;
+        void add_parameter(std::string_view param_name, std::string_view value) override;
+        void end_section(std::string_view section_name) override;
+        void end() override;
     };
 }

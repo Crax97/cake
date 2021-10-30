@@ -8,6 +8,7 @@
 #include "game_framework/initialization_object.h"
 #include "game_framework/stage.h"
 #include "serializers/string_serializer.h"
+#include "game_framework/loaders/stage_serializer.h"
 
 #include "glad/glad.h"
 #include "graphics_api.h"
@@ -23,6 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <fstream>
 
 using namespace std::string_literals;
 
@@ -40,7 +42,14 @@ void editor_application::on_new_level() noexcept {
   m_level_is_dirty = false;
 }
 void editor_application::on_load_request() noexcept {}
-void editor_application::on_save_request() noexcept {}
+void editor_application::on_save_request() noexcept {
+    std::fstream output_level;
+    output_level.open("level.cstage", std::ios::out | std::ios::trunc);
+    gameframework::stage_serializer serializer(output_level);
+    serializer.begin();
+    m_stage->serialize(serializer);
+    serializer.end();
+}
 
 void editor_application::draw_menubar() noexcept {
   if (ImGui::BeginMainMenuBar()) {

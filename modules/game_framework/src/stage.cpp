@@ -53,3 +53,9 @@ void spectacle::stage::on_stage_exit() noexcept {
   });
   m_actor_list.clear();
 }
+
+void spectacle::stage::serialize(serializer &ser) const {
+    for(const auto& actor : m_actor_list) {
+        actor->serialize(ser);
+    }
+}

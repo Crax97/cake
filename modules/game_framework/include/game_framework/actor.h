@@ -78,6 +78,8 @@ public:
     }
   }
 
+  void serialize(class serializer &serializer) const override;
+
   virtual ~actor() = default;
 };
 } // namespace spectacle

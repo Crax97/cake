@@ -71,6 +71,11 @@ void draw_property(field *prop,
                         ImGui::Text("No valid texture");
                     }
                 }
+                ImGui::SameLine();
+                if(ImGui::Button("Change Resource"))  {
+                    // auto res_path = open_res_path_dialog();
+                    // res.from_string(res_path.string());
+                }
             }
 
             void visit_pointer_property(pointer_field& ptr) override {
