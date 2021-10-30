@@ -15,6 +15,8 @@ template <typename T> T from_string(const std::string &s) {
   return T();
 }
 
+double read_number(std::istream& stream);
+
 string to_string(const glm::vec2 &vec);
 string to_string(const glm::vec3 &vec);
 string to_string(const glm::vec4 &vec);

@@ -87,7 +87,7 @@ void gameframework::stage_deserializer::read_param(actor_descriptor& actor_desc,
     } else if(key.spelling == "rotation") {
         actor_desc.rotation = read_rotation(tok);
     } else if(key.spelling == "scale") {
-        actor_desc.location = read_vec3(tok);
+        actor_desc.scale = read_vec3(tok);
     }
 }
 

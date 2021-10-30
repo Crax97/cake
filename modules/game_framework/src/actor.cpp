@@ -71,7 +71,7 @@ glm::vec3 spectacle::actor::get_scale() const noexcept {
 
 void spectacle::actor::serialize(serializer &ser) const {
     ser.begin_section("actor");
-    ser.add_parameter("prototype", "TODO");
+    ser.add_parameter("prototype", "\"TODO\"");
     ser.add_parameter("location", std::to_string(get_location()));
     ser.add_parameter("rotation", std::to_string(get_rotation()));
     ser.add_parameter("scale", std::to_string(get_scale()));

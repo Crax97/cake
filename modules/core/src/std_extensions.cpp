@@ -40,19 +40,19 @@ template <> double from_string(const std::string &val) {
 }
 template <> glm::vec2 from_string(const std::string &val) {
   glm::vec2 vec;
-
+  std::sscanf(val.c_str(), "[%f,%f]", &vec.x, &vec.y);
   return vec;
 }
 
 template <> glm::vec3 from_string(const std::string &val) {
   glm::vec3 vec;
-
+  std::sscanf(val.c_str(), "[%f,%f,%f]", &vec.x, &vec.y, &vec.z);
   return vec;
 }
 
 template <> glm::vec4 from_string(const std::string &val) {
   glm::vec4 vec;
-
+  std::sscanf(val.c_str(), "[%f,%f,%f,%f]", &vec.x, &vec.y, &vec.z, &vec.w);
   return vec;
 }
 
@@ -67,19 +67,22 @@ std::string to_string(const object &obj) {
 
 std::string to_string(const glm::vec2 &vec) {
   stringstream str;
-  str << "[" << vec.x << ", " << vec.y << "]";
+  str.precision(5);
+  str << std::fixed <<"[" << vec.x << ", " << vec.y << "]";
   return str.str();
 }
 
 std::string to_string(const glm::vec3 &vec) {
   stringstream str;
-  str << "[" << vec.x << ", " << vec.y << ", " << vec.z << "]";
+  str.precision(5);
+  str <<std::fixed << "[" << (float)vec.x << ", " << (float)vec.y << ", " << (float)vec.z << "]";
   return str.str();
 }
 
 std::string to_string(const glm::vec4 &vec) {
   stringstream str;
-  str << "[" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << "]";
+  str.precision(5);
+  str << std::fixed << "[" << (float)vec.x << ", " << (float)vec.y << ", " << (float)vec.z << ", " << (float)vec.w << "]";
   return str.str();
 }
 
