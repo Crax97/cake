@@ -12,28 +12,36 @@
 #include "actor.gen.h"
 
 void spectacle::actor::begin_play() noexcept {
-  for_each_component([](auto &component) { component.begin_play(); });
+  for_each_component([](auto &component) { component->begin_play(); });
 }
 
 void spectacle::actor::before_update(float delta_time) noexcept {
   for_each_component(
-      [delta_time](auto &component) { component.before_update(delta_time); });
+      [delta_time](auto &component) { component->before_update(delta_time); });
 }
 
 void spectacle::actor::update(float delta_time) noexcept {
   for_each_component(
-      [delta_time](auto &component) { component.update(delta_time); });
+      [delta_time](auto &component) { component->update(delta_time); });
 }
 
 void spectacle::actor::after_update(float delta_time) noexcept {
+    if(!m_components_removed_this_frame.empty()) {
+        erase_if(m_components, [&](auto component_pair) {
+            return std::find(m_components_removed_this_frame.begin(), m_components_removed_this_frame.end(),
+                             component_pair.second) != m_components_removed_this_frame.end();
+        });
+        m_components_removed_this_frame.clear();
+    }
+
   for_each_component(
-      [delta_time](auto &component) { component.after_update(delta_time); });
+      [delta_time](auto &component) { component->after_update(delta_time); });
 }
 
 void spectacle::actor::destroy() noexcept { m_is_pending_kill = true; }
 
 void spectacle::actor::on_destroy() noexcept {
-  for_each_component([](auto &component) { component.on_destroyed(); });
+  for_each_component([](auto &component) { component->on_destroyed(); });
 }
 
 void spectacle::actor::set_location(const glm::vec3 &new_location) noexcept {
@@ -103,4 +111,8 @@ std::shared_ptr<spectacle::actor> spectacle::actor::clone() const {
     }
 
     return new_actor;
+}
+
+void spectacle::actor::remove_component(std::shared_ptr<component> removed) noexcept {
+    m_components_removed_this_frame.push_back(removed);
 }

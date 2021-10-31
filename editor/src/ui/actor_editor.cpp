@@ -1,5 +1,7 @@
 #include "ui/actor_editor.h"
 
+#include <utility>
+
 #include "editor_application.h"
 #include "game_framework/component.h"
 #include "game_framework/components/component_repository.h"
@@ -46,12 +48,12 @@ void editor::actor_editor::draw_editor() noexcept {
 }
 
 void draw_property(field *prop,
-                   spectacle::component *component) {
+                   const std::weak_ptr<spectacle::component>& component) {
       class imgui_drawer : public field_visitor {
       public:
             field *m_prop;
-            spectacle::component* m_comp;
-            explicit imgui_drawer(field *in_prop, spectacle::component* in_comp) : m_prop(in_prop), m_comp(in_comp) {}
+            std::weak_ptr<spectacle::component>  m_comp;
+            explicit imgui_drawer(field *in_prop, std::weak_ptr<spectacle::component> in_comp) : m_prop(in_prop), m_comp(std::move(in_comp)) {}
 
             void visit_bool_property(bool &value) override {
                 ImGui::Checkbox(m_prop->get_name().c_str(), &value);
@@ -101,7 +103,7 @@ void draw_property(field *prop,
 
             void visit_pointer_property(pointer_field_base& ptr) override {
                 if(ptr.points_to<renderer::texture>()) {
-                    auto texture = ptr.get_ptr<renderer::texture>(m_comp);
+                    auto texture = ptr.get_ptr<renderer::texture>(m_comp.lock().get());
                     if(texture && texture->has_valid_texture()) {
                         ImGui::Image(texture->get_texture_object(), ImVec2(512, 512));
                     } else {
@@ -119,7 +121,7 @@ void draw_property(field *prop,
     };
 
     auto drawer = imgui_drawer{prop, component};
-    prop->visit(component, drawer);
+    prop->visit(component.lock().get(), drawer);
 }
 
 void editor::actor_editor::show_actor_fields(
@@ -151,11 +153,16 @@ void editor::actor_editor::show_actor_fields(
 }
 void editor::actor_editor::show_actor_components(
     std::shared_ptr<spectacle::actor> the_actor) noexcept {
-  the_actor->for_each_component([&](spectacle::component &component) {
-    ImGui::Text("%s", component.get_descriptor()->get_name().c_str());
+  the_actor->for_each_component([&](std::shared_ptr<spectacle::component> &component) {
+    ImGui::Text("%s", component->get_descriptor()->get_name().c_str());
+    ImGui::SameLine();
+    if(ImGui::Button("-")) {
+        the_actor->remove_component(component);
+        return;
+    }
     ImGui::Indent(1);
-    for (auto &field : component.get_descriptor()->get_fields()) {
-      draw_property(field.get(), &component);
+    for (auto &field : component->get_descriptor()->get_fields()) {
+      draw_property(field.get(), component);
     }
     ImGui::Indent(-1);
   });

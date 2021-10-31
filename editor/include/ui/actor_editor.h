@@ -21,7 +21,7 @@ public:
   void draw_editor() noexcept;
   void
   show_actor_fields(const std::shared_ptr<spectacle::actor>& the_actor) noexcept;
-  void
+  static void
   show_actor_components(std::shared_ptr<spectacle::actor> the_actor) noexcept;
   void select_actor(std::shared_ptr<spectacle::actor> new_actor);
   std::shared_ptr<spectacle::actor> get_selected_actor() noexcept {
