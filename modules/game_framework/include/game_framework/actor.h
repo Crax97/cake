@@ -23,8 +23,6 @@ private:
   std::shared_ptr<const actor> m_prototype;
   bool m_is_prototype = false;
 
-  std::list<std::shared_ptr<component>> m_components_removed_this_frame = {};
-
 protected:
   transform REFLECT() m_transform;
 
@@ -85,7 +83,7 @@ public:
     m_components.emplace(typeid(*new_component), std::move(new_component));
     }
 
-    void remove_component(std::shared_ptr<component> removed_component) noexcept;
+    void remove_component(const std::weak_ptr<component>& removed_component) noexcept;
 
     template <typename T> std::weak_ptr<T> get_component() noexcept {
     auto component = m_components.find(typeid(T));

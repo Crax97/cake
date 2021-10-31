@@ -16,8 +16,17 @@ void spectacle::actor::begin_play() noexcept {
 }
 
 void spectacle::actor::before_update(float delta_time) noexcept {
-  for_each_component(
-      [delta_time](auto &component) { component->before_update(delta_time); });
+  std::list<std::shared_ptr<component>> removed_components;
+    for_each_component(
+      [delta_time, &removed_components](auto &component) {
+          if(component->marked_for_removal()) {
+              removed_components.push_back(component);
+          } else {
+              component->before_update(delta_time);
+          }});
+    std::erase_if(m_components, [&removed_components](auto& comp) {
+        return std::find(removed_components.begin(), removed_components.end(), comp.second) != removed_components.end();
+    });
 }
 
 void spectacle::actor::update(float delta_time) noexcept {
@@ -26,14 +35,6 @@ void spectacle::actor::update(float delta_time) noexcept {
 }
 
 void spectacle::actor::after_update(float delta_time) noexcept {
-    if(!m_components_removed_this_frame.empty()) {
-        erase_if(m_components, [&](auto component_pair) {
-            return std::find(m_components_removed_this_frame.begin(), m_components_removed_this_frame.end(),
-                             component_pair.second) != m_components_removed_this_frame.end();
-        });
-        m_components_removed_this_frame.clear();
-    }
-
   for_each_component(
       [delta_time](auto &component) { component->after_update(delta_time); });
 }
@@ -113,6 +114,11 @@ std::shared_ptr<spectacle::actor> spectacle::actor::clone() const {
     return new_actor;
 }
 
-void spectacle::actor::remove_component(std::shared_ptr<component> removed) noexcept {
-    m_components_removed_this_frame.push_back(removed);
+void spectacle::actor::remove_component(const std::weak_ptr<component>& removed) noexcept {
+    auto component = std::find_if(m_components.begin(), m_components.end(), [&removed](auto& component_pair) {
+        return component_pair.second == removed.lock();
+    });
+    if(component != m_components.end()) {
+        component->second->mark_for_removal();
+    }
 }

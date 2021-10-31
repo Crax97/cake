@@ -37,6 +37,7 @@ void editor::actor_editor::draw_editor() noexcept {
                     auto new_component = gameframework::component_repository::the().construct_component(name,
                                                                                                         *m_selected_actor.lock());
                     m_selected_actor.lock()->add_new_component(new_component.value());
+                    wants_to_add_component = false;
                 }
             }
             ImGui::End();
@@ -157,7 +158,7 @@ void editor::actor_editor::show_actor_components(
     ImGui::Text("%s", component->get_descriptor()->get_name().c_str());
     ImGui::SameLine();
     if(ImGui::Button("-")) {
-        the_actor->remove_component(component);
+        component->mark_for_removal();
         return;
     }
     ImGui::Indent(1);

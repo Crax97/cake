@@ -11,9 +11,17 @@ class actor;
 class component : public object, public std::enable_shared_from_this<component> {
 private:
   actor &m_owner;
-
+    bool m_marked_for_removal = false;
 public:
   explicit component(actor &owner) : m_owner(owner) {}
+
+  void mark_for_removal() noexcept {
+      m_marked_for_removal = true;
+  }
+
+  bool marked_for_removal() const {
+      return m_marked_for_removal;
+  }
 
   virtual void initialize(const initialization_object &object) noexcept {}
   virtual void begin_play() noexcept {}
