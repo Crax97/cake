@@ -15,6 +15,7 @@
 #include "ui/dialogs.h"
 
 #include "imgui.h"
+#include "imgui_stdlib.h"
 #include "texture.h"
 
 void editor::actor_editor::draw_editor() noexcept {
@@ -26,6 +27,20 @@ void editor::actor_editor::draw_editor() noexcept {
     }
     show_actor_fields(m_selected_actor.lock());
     show_actor_components(m_selected_actor.lock());
+    if(wants_to_add_component ) {
+        ImGui::PushID("AddComponent");
+        if(ImGui::Begin("Add new component", &wants_to_add_component, ImGuiWindowFlags_Modal)) {
+            for (auto &name: gameframework::component_repository::the().get_component_names()) {
+                if (ImGui::Button(name.c_str())) {
+                    auto new_component = gameframework::component_repository::the().construct_component(name,
+                                                                                                        *m_selected_actor.lock());
+                    m_selected_actor.lock()->add_new_component(new_component.value());
+                }
+            }
+            ImGui::End();
+        }
+        ImGui::PopID();
+    }
     ImGui::End();
   }
 }
@@ -50,7 +65,9 @@ void draw_property(field *prop,
             void visit_float_property(float &value) override {
                 ImGui::InputFloat(m_prop->get_name().c_str(), &value);
             }
-            void visit_string_property(std::string &value) override {}
+            void visit_string_property(std::string &value) override {
+                ImGui::InputText(m_prop->get_name().c_str(), &value, ImGuiInputTextFlags_None);
+            }
             void visit_vec2_property(glm::vec2 &value) override {
                 ImGui::DragFloat2(m_prop->get_name().c_str(), &value[0]);
             }
@@ -107,25 +124,30 @@ void draw_property(field *prop,
 
 void editor::actor_editor::show_actor_fields(
     const std::shared_ptr<spectacle::actor>& the_actor) noexcept {
-  ImGui::Text("Actor Transform");
-  bool needs_update = false;
+    ImGui::Text("Editing %s", the_actor->get_name().data());
+    ImGui::SameLine();
+    if(ImGui::Button("+")) {
+        wants_to_add_component = true;
+    }
+    ImGui::Text("Actor Transform");
+    bool needs_update = false;
 
-  if (ImGui::DragFloat3("Location",
+    if (ImGui::DragFloat3("Location",
                         &the_actor->get_transform().get_location()[0])) {
     needs_update = true;
-  }
-  auto rotation_quat = the_actor->get_transform().get_rotation();
-  auto euler_rotation = glm::eulerAngles(rotation_quat);
-  if (ImGui::DragFloat3("Rotation", &euler_rotation[0])) {
+    }
+    auto rotation_quat = the_actor->get_transform().get_rotation();
+    auto euler_rotation = glm::eulerAngles(rotation_quat);
+    if (ImGui::DragFloat3("Rotation", &euler_rotation[0])) {
     the_actor->set_rotation(glm::quat(euler_rotation));
-  }
+    }
 
-  if (ImGui::DragFloat3("Scale", &the_actor->get_transform().get_scale()[0])) {
+    if (ImGui::DragFloat3("Scale", &the_actor->get_transform().get_scale()[0])) {
     needs_update = true;
-  }
-  if (needs_update) {
+    }
+    if (needs_update) {
     the_actor->get_transform().update_transform_matrix();
-  }
+    }
 }
 void editor::actor_editor::show_actor_components(
     std::shared_ptr<spectacle::actor> the_actor) noexcept {

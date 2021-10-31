@@ -49,3 +49,9 @@ editor::dialogs::save_file(std::string_view window_title, std::initializer_list<
     delete[] c_extensions;
     return path;
 }
+
+std::optional<std::string> editor::dialogs::text_input(std::string_view window_title, std::string_view message, std::string_view default_input) {
+    const char* data = tinyfd_inputBox(window_title.data(), message.data(), default_input.data());
+    if(!data) return {};
+    return data;
+}
