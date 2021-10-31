@@ -72,7 +72,7 @@ glm::vec3 spectacle::actor::get_scale() const noexcept {
 void spectacle::actor::serialize(serializer &ser) const {
     ser.begin_section("actor");
     ser.add_parameter("name", "\"" + std::string(get_name()) + "\"");
-    ser.add_parameter("prototype", "\"TODO\"");
+    ser.add_parameter("prototype", "\""+ std::string(m_prototype ? m_prototype->get_name() : "") + "\"");
     ser.add_parameter("location", std::to_string(get_location()));
     ser.add_parameter("rotation", std::to_string(get_rotation()));
     ser.add_parameter("scale", std::to_string(get_scale()));
@@ -86,4 +86,21 @@ spectacle::actor::actor() {
     static int id = 0;
     m_name = std::string("Actor") + std::to_string(id);
     id++;
+}
+
+std::shared_ptr<spectacle::actor> spectacle::actor::clone() const {
+    auto new_actor = std::make_shared<spectacle::actor>();
+    if(m_prototype) {
+        new_actor->m_prototype = m_prototype;
+    } else if (m_is_prototype){
+        new_actor->m_prototype = shared_from_this();
+    } else {
+        new_actor->m_prototype = nullptr;
+    }
+
+    for(const auto& component : m_components) {
+        new_actor->add_new_component(component.second->clone(*new_actor));
+    }
+
+    return new_actor;
 }

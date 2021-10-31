@@ -29,8 +29,6 @@ public:
   initialize(const spectacle::initialization_object &object) noexcept override;
 
   virtual std::shared_ptr<spectacle::component>
-  clone() const noexcept override {
-    return nullptr;
-  }
+  clone(spectacle::actor& new_owner) const noexcept override;
 };
 } // namespace gameframework

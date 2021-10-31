@@ -42,3 +42,11 @@ void gameframework::sprite_component::initialize(
     m_texture = texture_maybe.value();
   }
 }
+
+std::shared_ptr<spectacle::component>
+gameframework::sprite_component::clone(spectacle::actor &new_owner) const noexcept {
+    auto new_sprite_component = std::make_shared<sprite_component>(new_owner);
+    new_sprite_component->m_texture = m_texture;
+    new_sprite_component->m_sprite_scale = m_sprite_scale;
+    return new_sprite_component;
+}

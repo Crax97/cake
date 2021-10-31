@@ -44,9 +44,8 @@ void editor::sidebar::draw_sidebar() noexcept {
                     m_is_editing_actor = false;
                 }
                 if(ImGui::Button("Duplicate actor")) {
-                    // auto new_actor = m_selected_actor->clone();
-                    // new_actor->set_name(m_selected_actor->get_name() + " dup");
-                    // m_editor.get_editing_stage()->add_new_actor(new_actor);
+                    auto new_actor = m_selected_actor->clone();
+                    m_editor.get_editing_stage()->add_new_actor(new_actor);
                     m_is_editing_actor = false;
                 }
                 if(ImGui::Button("Delete actor")) {

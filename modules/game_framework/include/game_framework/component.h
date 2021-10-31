@@ -23,7 +23,7 @@ public:
   virtual void after_update(float delta_time) noexcept {}
   virtual void on_destroyed() noexcept {}
 
-  virtual std::shared_ptr<component> clone() const noexcept = 0;
+  virtual std::shared_ptr<component> clone(spectacle::actor& new_owner) const noexcept = 0;
 
   actor &get_owner() noexcept { return m_owner; }
 

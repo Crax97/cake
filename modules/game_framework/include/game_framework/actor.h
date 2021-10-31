@@ -14,12 +14,14 @@
 namespace spectacle {
 class component;
 
-class REFLECT() actor : public object {
+class REFLECT() actor : public object, public std::enable_shared_from_this<actor> {
   GENERATE_REFLECT_BODY(actor)
     friend class stage;
 private:
   bool m_is_pending_kill = false;
   std::unordered_map<std::type_index, std::shared_ptr<component>> m_components;
+  std::shared_ptr<const actor> m_prototype;
+  bool m_is_prototype = false;
 
 protected:
   transform REFLECT() m_transform;
@@ -53,6 +55,10 @@ public:
     // Called when the actor is actually destroyed from the scene
     virtual void on_destroy() noexcept;
 
+    void enable_prototype() {
+        m_is_prototype = true;
+    }
+
     void destroy() noexcept;
     bool is_pending_kill() const noexcept { return m_is_pending_kill; }
 
@@ -69,6 +75,8 @@ public:
     glm::vec3 get_scale() const noexcept;
 
     transform &get_transform() noexcept { return m_transform; }
+
+    std::shared_ptr<actor> clone() const;
 
     template <typename T>
     void add_new_component(std::shared_ptr<T> new_component) noexcept {
