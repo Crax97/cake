@@ -1,6 +1,7 @@
 #include "ui/actor_editor.h"
 
 #include <utility>
+#include <string_view>
 
 #include "editor_application.h"
 #include "game_framework/component.h"
@@ -21,31 +22,28 @@
 #include "texture.h"
 
 void editor::actor_editor::draw_editor() noexcept {
-  if (ImGui::Begin("Actor Editor")) {
+    ImGui::PushID(this);
+
     if (m_selected_actor.expired()) {
       ImGui::Text("No actor selected");
-      ImGui::End();
+      ImGui::PopID();
       return;
     }
     show_actor_fields(m_selected_actor.lock());
     show_actor_components(m_selected_actor.lock());
-    if(wants_to_add_component ) {
-        ImGui::PushID("AddComponent");
-        if(ImGui::Begin("Add new component", &wants_to_add_component, ImGuiWindowFlags_Modal)) {
-            for (auto &name: gameframework::component_repository::the().get_component_names()) {
-                if (ImGui::Button(name.c_str())) {
-                    auto new_component = gameframework::component_repository::the().construct_component(name,
-                                                                                                        *m_selected_actor.lock());
-                    m_selected_actor.lock()->add_new_component(new_component.value());
-                    wants_to_add_component = false;
-                }
+    if(wants_to_add_component && ImGui::Begin("Add new component", &wants_to_add_component, ImGuiWindowFlags_Modal)) {
+        for (auto &name: gameframework::component_repository::the().get_component_names()) {
+            if (ImGui::Button(name.c_str())) {
+                auto new_component = gameframework::component_repository::the().construct_component(name,
+                                                                                                    *m_selected_actor.lock());
+                m_selected_actor.lock()->add_new_component(new_component.value());
+                wants_to_add_component = false;
             }
-            ImGui::End();
         }
-        ImGui::PopID();
+        ImGui::End();
     }
-    ImGui::End();
-  }
+
+    ImGui::PopID();
 }
 
 void draw_property(field *prop,

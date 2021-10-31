@@ -7,7 +7,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/sidebar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/dialogs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/actor_editor.cpp
-)
+        src/ui/prototype_editor.cpp include/ui/prototype_editor.h)
 set(EDITOR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(editor ${EDITOR_SOURCE_FILES})

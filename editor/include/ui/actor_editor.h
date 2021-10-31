@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 namespace spectacle {
 class stage;
@@ -12,12 +13,9 @@ class editor_application;
 namespace editor {
 class actor_editor {
 private:
-  editor_application &m_editor;
   std::weak_ptr<spectacle::actor> m_selected_actor;
     bool wants_to_add_component = false;
 public:
-  constexpr actor_editor(editor_application &application) noexcept
-      : m_editor(application) {}
   void draw_editor() noexcept;
   void
   show_actor_fields(const std::shared_ptr<spectacle::actor>& the_actor) noexcept;

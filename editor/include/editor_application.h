@@ -9,6 +9,7 @@
 #include "glm/glm.hpp"
 #include "ui/actor_editor.h"
 #include "ui/sidebar.h"
+#include "ui/prototype_editor.h"
 
 struct ImGuiContext;
 
@@ -21,6 +22,7 @@ class editor_application : public gameframework::game {
 private:
   editor::sidebar m_sidebar;
   editor::actor_editor m_actor_editor;
+  editor::prototype_editor m_proto_editor;
 
   const int sidebar_width = 200; // px
   int menubar_height = 0;
@@ -59,4 +61,6 @@ public:
   void on_actor_selected(std::shared_ptr<spectacle::actor> actor) noexcept;
 
   ~editor_application() noexcept override;
+
+    void open_actor_prototype_editor();
 };

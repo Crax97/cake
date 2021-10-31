@@ -9,6 +9,10 @@
 #include "game_framework/stage.h"
 #include "serializers/string_serializer.h"
 #include "game_framework/loaders/stage_serializer.h"
+#include "game_framework/loaders/actor_loader.h"
+#include "game_framework/loaders/stage_deserializer.h"
+
+#include "ui/dialogs.h"
 
 #include "glad/glad.h"
 #include "graphics_api.h"
@@ -17,19 +21,17 @@
 #include "input/inputsystem.h"
 #include "input/keys.h"
 #include "mesh.h"
-#include "ui/dialogs.h"
 #include "window.h"
 
 #include <iostream>
 #include <memory>
 #include <string>
 #include <fstream>
-#include <game_framework/loaders/stage_deserializer.h>
 
 using namespace std::string_literals;
 
 editor_application::editor_application(int argc, char **argv)
-    : gameframework::game(argc, argv), m_sidebar(*this), m_actor_editor(*this) {
+    : gameframework::game(argc, argv), m_sidebar(*this) {
 }
 
 void editor_application::on_new_level() noexcept {
@@ -72,6 +74,8 @@ void editor_application::on_save_request() noexcept {
     serializer.begin();
     m_stage->serialize(serializer);
     serializer.end();
+
+    gameframework::actor_loader::the().dump_actors(".");
 }
 
 void editor_application::draw_menubar() noexcept {
@@ -91,7 +95,12 @@ void editor_application::draw_menubar() noexcept {
       ImGui::EndMenu();
     }
 
-    ImGui::MenuItem("Edit");
+    if (ImGui::BeginMenu("Edit")) {
+        if(ImGui::MenuItem("Edit Actor Prototypes")) {
+            open_actor_prototype_editor();
+        }
+        ImGui::EndMenu();
+    }
     ImGui::MenuItem("Help");
     ImGui::EndMainMenuBar();
   }
@@ -149,7 +158,12 @@ void editor_application::update_imgui() noexcept {
   draw_game_window();
   draw_menubar();
   draw_sidebar();
-  m_actor_editor.draw_editor();
+  m_proto_editor.update();
+
+    if (ImGui::Begin("Actor Editor")) {
+        m_actor_editor.draw_editor();
+        ImGui::End();
+    }
   ImGui::End();
 
   ImGui::Render();
@@ -226,3 +240,7 @@ void editor_application::on_app_shutdown() noexcept {
 }
 
 editor_application::~editor_application() noexcept {}
+
+void editor_application::open_actor_prototype_editor() {
+    m_proto_editor.open();
+}

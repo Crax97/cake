@@ -4,6 +4,7 @@
 
 #include "game_framework/loaders/stage_deserializer.h"
 #include "game_framework/loaders/miku_tokenizer.h"
+#include "game_framework/loaders/actor_loader.h"
 #include "game_framework/actor.h"
 #include "game_framework/component.h"
 
@@ -55,7 +56,11 @@ std::shared_ptr<spectacle::actor> gameframework::stage_deserializer::actor_from_
     if(desc.prototype.empty()) {
         actor = std::make_shared<spectacle::actor>();
     } else {
-        // actor = std::make_shared<spectacle::actor>();
+        auto actor_prototype = actor_loader::the().get_actor(desc.prototype);
+        if(!actor_prototype) {
+            // LOG ERROR
+        }
+        actor = actor_prototype.value()->clone();
     }
 
     for(const auto& [key, value] : desc.values) {

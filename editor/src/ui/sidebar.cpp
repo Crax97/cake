@@ -1,6 +1,7 @@
 #include "ui/sidebar.h"
 #include "editor_application.h"
 #include "game_framework/components/component_repository.h"
+#include "game_framework/loaders/actor_loader.h"
 #include "ui/dialogs.h"
 
 #include "game_framework/actor.h"
@@ -52,6 +53,11 @@ void editor::sidebar::draw_sidebar() noexcept {
                     m_selected_actor->destroy();
                     m_selected_actor = nullptr;
                     m_editor.on_actor_selected(nullptr);
+                    m_is_editing_actor = false;
+                }
+                if(ImGui::Button("Enable as prototype")) {
+                    m_selected_actor->enable_prototype();
+                    gameframework::actor_loader::the().add_prototype(m_selected_actor);
                     m_is_editing_actor = false;
                 }
                 ImGui::EndPopup();

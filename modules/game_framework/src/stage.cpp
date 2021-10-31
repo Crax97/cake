@@ -43,6 +43,7 @@ void spectacle::stage::on_stage_perform(float delta_seconds) noexcept {
 
 void spectacle::stage::add_new_actor(
     std::shared_ptr<spectacle::actor> new_actor) noexcept {
+    new_actor->begin_play();
   m_actor_list.push_back(std::move(new_actor));
 }
 

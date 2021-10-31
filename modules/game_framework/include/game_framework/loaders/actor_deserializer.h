@@ -40,8 +40,8 @@ namespace gameframework {
 
         void deserialize(std::istream &stage_stream);
 
-        [[nodiscard]] std::shared_ptr <spectacle::actor> &&get_actor() {
-            return std::move(m_actor);
+        [[nodiscard]] std::shared_ptr <spectacle::actor> &get_actor() {
+            return m_actor;
         }
 
         bool good();
