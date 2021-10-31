@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <memory>
+#include <unordered_map>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -38,11 +39,8 @@ namespace gameframework {
         };
 
         struct actor_descriptor {
-            std::string name;
             std::string prototype;
-            glm::vec3 location;
-            glm::quat rotation;
-            glm::vec3 scale;
+            std::unordered_map<std::string, std::string> values;
         };
 
         std::unique_ptr<spectacle::stage> m_stage;
@@ -53,9 +51,6 @@ namespace gameframework {
         [[nodiscard]] bool has_section(class miku_tokenizer& tok) const;
         void deserialize_actor(class miku_tokenizer& tokenizer1);
         void read_param(actor_descriptor& actor_desc, const token& token, class miku_tokenizer& tok);
-        double read_number(class miku_tokenizer &tok);
-        glm::vec3 read_vec3(class miku_tokenizer &tok);
-        glm::quat read_rotation(class miku_tokenizer & tok);
 
         std::shared_ptr<spectacle::actor> actor_from_description(actor_descriptor& desc);
         public:

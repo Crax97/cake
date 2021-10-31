@@ -32,28 +32,36 @@ template <> unsigned long from_string(const std::string &val) {
 template <> unsigned long long from_string(const std::string &val) {
   return std::stoull(val);
 }
-template <> bool from_string(const std::string &val) { return val == "true"; }
+template <> bool from_string(const std::string &val) { return  !val.empty() && (val != "false" || val != "0"); }
 
 template <> float from_string(const std::string &val) { return std::stof(val); }
 template <> double from_string(const std::string &val) {
   return std::stod(val);
 }
 template <> glm::vec2 from_string(const std::string &val) {
-  glm::vec2 vec;
-  std::sscanf(val.c_str(), "[%f,%f]", &vec.x, &vec.y);
-  return vec;
+    glm::vec2 vec;
+    std::stringstream str(val);
+    str >> vec.x;
+    str >> vec.y;
+    return vec;
 }
 
 template <> glm::vec3 from_string(const std::string &val) {
-  glm::vec3 vec;
-  std::sscanf(val.c_str(), "[%f,%f,%f]", &vec.x, &vec.y, &vec.z);
-  return vec;
+    glm::vec3 vec;
+    std::stringstream str(val);
+    str >> vec.x;
+    str >> vec.y;
+    str >> vec.z;
+    return vec;
 }
 
 template <> glm::vec4 from_string(const std::string &val) {
-  glm::vec4 vec;
-  std::sscanf(val.c_str(), "[%f,%f,%f,%f]", &vec.x, &vec.y, &vec.z, &vec.w);
-  return vec;
+    glm::vec4 vec;
+    std::stringstream str(val);
+    str >> vec.x;
+    str >> vec.y;
+    str >> vec.z;
+    return vec;
 }
 
 template <> glm::quat from_string(const std::string &val) {
@@ -68,21 +76,21 @@ std::string to_string(const object &obj) {
 std::string to_string(const glm::vec2 &vec) {
   stringstream str;
   str.precision(5);
-  str << std::fixed <<"[" << vec.x << ", " << vec.y << "]";
+  str << std::fixed << vec.x << " " << vec.y;
   return str.str();
 }
 
 std::string to_string(const glm::vec3 &vec) {
   stringstream str;
   str.precision(5);
-  str <<std::fixed << "[" << (float)vec.x << ", " << (float)vec.y << ", " << (float)vec.z << "]";
+  str <<std::fixed << (float)vec.x << " " << (float)vec.y << " " << (float)vec.z;
   return str.str();
 }
 
 std::string to_string(const glm::vec4 &vec) {
   stringstream str;
   str.precision(5);
-  str << std::fixed << "[" << (float)vec.x << ", " << (float)vec.y << ", " << (float)vec.z << ", " << (float)vec.w << "]";
+  str << std::fixed << (float)vec.x << " " << (float)vec.y << " " << (float)vec.z << " " << (float)vec.w;
   return str.str();
 }
 

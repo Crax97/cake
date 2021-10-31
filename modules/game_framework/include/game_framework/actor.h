@@ -92,6 +92,9 @@ public:
 
     return component->second;
     }
+
+    std::shared_ptr<component> find_component_by_name(std::string_view name);
+
     template <typename Func> void for_each_component(Func &&func) noexcept {
     for (auto &pair : m_components) {
       func(pair.second);

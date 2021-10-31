@@ -17,7 +17,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/actor.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/stage.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/transform.cpp
-        src/loaders/miku_tokenizer.cpp)
+        src/loaders/miku_tokenizer.cpp src/loaders/actor_loader.cpp include/game_framework/loaders/actor_loader.h src/loaders/actor_deserializer.cpp include/game_framework/loaders/actor_deserializer.h)
 add_library(gameframework STATIC ${GAMEFRAMEWORK_SOURCES})
 target_include_directories(gameframework PUBLIC 
 ${GAMEFRAMEWORK_INCLUDE_DIRS} 

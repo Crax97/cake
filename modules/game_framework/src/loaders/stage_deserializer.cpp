@@ -4,7 +4,6 @@
 
 #include "game_framework/loaders/stage_deserializer.h"
 #include "game_framework/loaders/miku_tokenizer.h"
-#include "game_framework/components/component_repository.h"
 #include "game_framework/actor.h"
 #include "game_framework/component.h"
 
@@ -12,6 +11,7 @@
 #include <cassert>
 #include <istream>
 #include <memory>
+#include <game_framework/components/component_repository.h>
 
 void gameframework::stage_deserializer::begin(miku_tokenizer& tok) {
     auto section = tok.consume(token_type::id);
@@ -50,14 +50,25 @@ gameframework::stage_deserializer::section_type gameframework::stage_deserialize
 }
 
 std::shared_ptr<spectacle::actor> gameframework::stage_deserializer::actor_from_description(gameframework::stage_deserializer::actor_descriptor& desc) {
-    assert(!desc.prototype.empty());
-    auto actor = std::make_shared<spectacle::actor>();
-    if(!desc.name.empty()) {
-        actor->set_name(desc.name);
+
+    std::shared_ptr<spectacle::actor> actor;
+    if(desc.prototype.empty()) {
+        actor = std::make_shared<spectacle::actor>();
+    } else {
+        // actor = std::make_shared<spectacle::actor>();
     }
-    actor->set_location(desc.location);
-    actor->set_rotation(desc.rotation);
-    actor->set_scale(desc.scale);
+
+    for(const auto& [key, value] : desc.values) {
+        if(key == "name") {
+            actor->set_name(value);
+            continue;
+        }
+        auto field = actor->get_descriptor()->find_field(key);
+        if(field) {
+            field.value()->set_from_string(actor.get(), value);
+        }
+    }
+
     return actor;
 }
 
@@ -87,46 +98,10 @@ void gameframework::stage_deserializer::read_param(actor_descriptor& actor_desc,
     if(key.spelling == "prototype") {
         auto base_entity = tok.consume(token_type::string).spelling;
         actor_desc.prototype = base_entity;
-    } else if(key.spelling == "location") {
-        actor_desc.location = read_vec3(tok);
-    } else if(key.spelling == "rotation") {
-        actor_desc.rotation = read_rotation(tok);
-    } else if(key.spelling == "scale") {
-        actor_desc.scale = read_vec3(tok);
-    } else if(key.spelling == "name") {
-        actor_desc.name = tok.consume(token_type::string).spelling;
+    } else {
+        auto value = tok.consume(token_type::string).spelling;
+        actor_desc.values[key.spelling] = value;
     }
-}
-
-double gameframework::stage_deserializer::read_number(miku_tokenizer &tok) {
-    auto num = tok.consume(token_type::number);
-    return std::stod(num.spelling);
-}
-
-glm::vec3 gameframework::stage_deserializer::read_vec3(miku_tokenizer &tok) {
-    tok.consume(token_type::left_square_paren);
-    glm::vec3 vec;
-    vec.x = read_number(tok);
-    tok.consume(token_type::comma);
-    vec.y = read_number(tok);
-    tok.consume(token_type::comma);
-    vec.z = read_number(tok);
-    tok.consume(token_type::right_square_paren);
-    return vec;
-}
-
-glm::quat gameframework::stage_deserializer::read_rotation(miku_tokenizer &tok) {
-    tok.consume(token_type::left_square_paren);
-    glm::quat rot;
-    rot.x = read_number(tok);
-    tok.consume(token_type::comma);
-    rot.y = read_number(tok);
-    tok.consume(token_type::comma);
-    rot.z = read_number(tok);
-    tok.consume(token_type::comma);
-    rot.w = read_number(tok);
-    tok.consume(token_type::right_square_paren);
-    return rot;
 }
 
 bool gameframework::stage_deserializer::good() {
@@ -145,9 +120,12 @@ void gameframework::stage_deserializer::read_components(std::shared_ptr<spectacl
 void
 gameframework::stage_deserializer::read_component(std::string_view component_name, std::shared_ptr<spectacle::actor> &actor_ptr,
                                                   miku_tokenizer &tok) {
-    auto component_maybe = component_repository::the().construct_component(std::string(component_name), *actor_ptr);
-    assert(component_maybe.has_value());
-    auto component_ptr = component_maybe.value();
+    std::shared_ptr<spectacle::component> component_ptr = actor_ptr->find_component_by_name(component_name);
+    if(!component_ptr) {
+        auto component_maybe = component_repository::the().construct_component(std::string(component_name), *actor_ptr);
+        assert(component_maybe.has_value());
+        component_ptr = component_maybe.value();
+    }
     tok.consume(token_type::left_square_paren);
     while(tok.peek().type != token_type::right_square_paren) {
         std::string prop_name = tok.consume(token_type::id).spelling;

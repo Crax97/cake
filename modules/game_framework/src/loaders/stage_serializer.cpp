@@ -6,6 +6,7 @@
 #include <cassert>
 
 #include <ostream>
+#include <iomanip>
 
 void gameframework::stage_serializer::begin() {
     m_stream << "scene [\n";
@@ -18,7 +19,7 @@ void gameframework::stage_serializer::begin_section(std::string_view section_nam
 }
 
 void gameframework::stage_serializer::add_parameter(std::string_view param_name, std::string_view value) {
-    m_stream << std::string(m_tabs, '\t') << param_name << "=" << value << "\n";
+    m_stream << std::string(m_tabs, '\t') << param_name << "=" << std::quoted(value) << "\n";
 }
 
 void gameframework::stage_serializer::end_section(std::string_view section_name) {

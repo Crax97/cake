@@ -80,8 +80,8 @@ glm::vec3 spectacle::actor::get_scale() const noexcept {
 
 void spectacle::actor::serialize(serializer &ser) const {
     ser.begin_section("actor");
-    ser.add_parameter("name", "\"" + std::string(get_name()) + "\"");
-    ser.add_parameter("prototype", "\""+ std::string(m_prototype ? m_prototype->get_name() : "") + "\"");
+    ser.add_parameter("name", std::string(get_name()));
+    if(m_prototype) ser.add_parameter("prototype", std::string(m_prototype->get_name() ));
     ser.add_parameter("location", std::to_string(get_location()));
     ser.add_parameter("rotation", std::to_string(get_rotation()));
     ser.add_parameter("scale", std::to_string(get_scale()));
@@ -121,4 +121,13 @@ void spectacle::actor::remove_component(const std::weak_ptr<component>& removed)
     if(component != m_components.end()) {
         component->second->mark_for_removal();
     }
+}
+
+std::shared_ptr<spectacle::component> spectacle::actor::find_component_by_name(std::string_view name){
+    for(const auto&[_, component] : m_components) {
+        if(component->get_descriptor()->get_name() == name) {
+            return component;
+        }
+    }
+    return nullptr;
 }
