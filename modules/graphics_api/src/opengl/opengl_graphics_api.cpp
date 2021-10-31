@@ -4,12 +4,17 @@
 #include "opengl_mesh.h"
 #include "opengl_shader.h"
 #include "opengl_texture.h"
+
+#include "logging/logger.h"
+
 #include <SDL2/SDL_video.h>
 
 #include <cassert>
 #include <iostream>
 
 #include <glad/glad.h>
+
+static logging::category log_gl("opengl");
 
 // modified from https://gist.github.com/liam-middlebrook/c52b069e4be2d87a6d2f
 void APIENTRY gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
@@ -102,8 +107,8 @@ void APIENTRY gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
     break;
   }
 
-  std::cout << id << ": " << _type << " of " << _severity
-            << " severity, raised from " << _source << ": " << msg << "\n";
+    log_gl(severity == GL_DEBUG_SEVERITY_HIGH ? logging::severity::fatal : logging::severity::info) << id << ": " << _type << " of " << _severity
+            << " severity, raised from " << _source << ": " << msg;
 }
 
 renderer::opengl_graphics_api::opengl_graphics_api(

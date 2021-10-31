@@ -7,7 +7,11 @@
 #include "game_framework/components/component_repository.h"
 #include "game_framework/components/sprite_component.h"
 
+#include "logging/logger.h"
+
 #include <memory>
+
+static logging::category core("core");
 
 gameframework::game *g_game{nullptr};
 
@@ -26,6 +30,7 @@ void gameframework::game::on_app_startup() noexcept {
       std::make_unique<gameframework::rendering_world>(get_api());
   m_stage = std::make_unique<spectacle::stage>();
   m_stage->on_stage_enter();
+    core(logging::severity::info) << "Game loaded";
 }
 void gameframework::game::on_app_update() noexcept {
   update_game();

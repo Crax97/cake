@@ -26,6 +26,6 @@ ${GAMEFRAMEWORK_INCLUDE_DIRS}
     ${RENDERER_EXPORTED_DIRS} 
     ${STB_HEADERS_DIR}
 )
-target_link_libraries(gameframework graphics_api renderer application core)
+target_link_libraries(gameframework graphics_api renderer application core loglib)
 
 set(GAMEFRAMEWORK_EXPORTED_DIRS ${GAMEFRAMEWORK_INCLUDE_DIRS} PARENT_SCOPE)

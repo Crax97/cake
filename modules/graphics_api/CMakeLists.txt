@@ -39,7 +39,7 @@ set(GRAPHICSAPI_EXPORTED_DIRS include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES} 
 add_library(graphics_api STATIC ${SOURCES})
 target_include_directories(graphics_api PUBLIC include ${SDL2_INCLUDE_DIRS} ${OPTIONAL_INCLUDES})
 
-target_link_libraries(graphics_api ${OPTIONAL_LINK_LIBS} ${SDL2_LIBRARIES})
+target_link_libraries(graphics_api loglib ${OPTIONAL_LINK_LIBS} ${SDL2_LIBRARIES})
 
 if (BUILD_EXAMPLES)
     file(GLOB EXAMPLES examples/*)
