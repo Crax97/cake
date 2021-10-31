@@ -30,6 +30,7 @@ word = // any combination of alphanumeric characters, beginning with a letter
 */
 
 namespace gameframework {
+    struct token;
     class stage_deserializer {
     private:
         enum class section_type {
@@ -44,53 +45,17 @@ namespace gameframework {
             glm::vec3 scale;
         };
 
-        class tokenizer {
-        private:
-            std::istream& m_stream;
-        public:
-            enum class token_type {
-                id,
-                number,
-                string,
-                equal,
-                comma,
-                left_square_paren,
-                right_square_paren,
-            };
-
-            struct token {
-                token_type type;
-                std::string spelling;
-            };
-        private:
-            std::list<token> m_tokens;
-            void push(const token& tok ) {
-                m_tokens.push_back(tok);
-            }
-            void read_id();
-            void read_number();
-            void read_string();
-            void ignore_characters();
-        public:
-            explicit tokenizer(std::istream& stream)
-                : m_stream(stream) { }
-            void tokenize();
-            token next();
-            [[nodiscard]] const token& peek() const;
-            token consume(token_type type);
-        };
-
         std::unique_ptr<spectacle::stage> m_stage;
         int m_tabs = 0;
-        void begin(tokenizer& stage_tokenizer);
-        section_type next_section(tokenizer &tok);
-        void end(tokenizer& stage_tokenizer);
-        [[nodiscard]] bool has_section(tokenizer& tok) const;
-        void deserialize_actor(tokenizer& tokenizer1);
-        void read_param(actor_descriptor& actor_desc, const tokenizer::token& token, tokenizer& tok);
-        double read_number(tokenizer &tok);
-        glm::vec3 read_vec3(tokenizer &tokenizer);
-        glm::quat read_rotation(tokenizer &tokenizer);
+        void begin(class miku_tokenizer& stage_tokenizer);
+        section_type next_section(class miku_tokenizer &tok);
+        void end(class miku_tokenizer& stage_tokenizer);
+        [[nodiscard]] bool has_section(class miku_tokenizer& tok) const;
+        void deserialize_actor(class miku_tokenizer& tokenizer1);
+        void read_param(actor_descriptor& actor_desc, const token& token, class miku_tokenizer& tok);
+        double read_number(class miku_tokenizer &tok);
+        glm::vec3 read_vec3(class miku_tokenizer &tok);
+        glm::quat read_rotation(class miku_tokenizer & tok);
 
         std::shared_ptr<spectacle::actor> actor_from_description(actor_descriptor& desc);
         public:
@@ -99,8 +64,8 @@ namespace gameframework {
         [[nodiscard]] std::unique_ptr<spectacle::stage>&& get_stage();
         bool good();
 
-        void read_components(std::shared_ptr<spectacle::actor> &actor, tokenizer &tokenizer);
+        void read_components(std::shared_ptr<spectacle::actor> &actor, class miku_tokenizer & tok);
 
-        void read_component(std::string_view component_name, std::shared_ptr<spectacle::actor> &actor_ptr, tokenizer &tok);
+        void read_component(std::string_view component_name, std::shared_ptr<spectacle::actor> &actor_ptr, class miku_tokenizer &tok);
     };
 }
