@@ -37,6 +37,7 @@ namespace gameframework {
         };
 
         struct actor_descriptor {
+            std::string name;
             std::string prototype;
             glm::vec3 location;
             glm::quat rotation;

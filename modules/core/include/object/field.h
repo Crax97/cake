@@ -43,6 +43,7 @@ DEFINE_DO_VISIT(char, visit_char_property)
 DEFINE_DO_VISIT(int, visit_int_property)
 DEFINE_DO_VISIT(float, visit_float_property)
 DEFINE_DO_VISIT(double, visit_double_property)
+DEFINE_DO_VISIT(std::string, visit_string_property)
 DEFINE_DO_VISIT(glm::vec2, visit_vec2_property)
 DEFINE_DO_VISIT(glm::vec3, visit_vec3_property)
 DEFINE_DO_VISIT(glm::vec4, visit_vec4_property)
@@ -158,6 +159,8 @@ public:
         auto& self = get_self(base).*m_field_ptr;
         if constexpr(object_utilities::is_resource<Type>) {
             return self.to_string();
+        } else if constexpr(std::is_same_v<Type, std::string>) {
+            return self;
         } else {
             return std::to_string(self);
         }
@@ -168,6 +171,8 @@ public:
         auto& self = get_self(base).*m_field_ptr;
         if constexpr(object_utilities::is_resource<Type>) {
             self.from_string(value);
+        } else if constexpr(std::is_same_v<Type, std::string>) {
+            self = value;
         } else {
             self = std::from_string<Type>(value);
         }

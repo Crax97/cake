@@ -25,58 +25,68 @@ protected:
   transform REFLECT() m_transform;
 
 public:
-  bool REFLECT() is_enabled = true;
-  bool REFLECT() tick_enabled = true;
+    actor();
+    std::string REFLECT() m_name;
 
-  // When this actor enters the scene
-  virtual void begin_play() noexcept;
+    bool REFLECT() is_enabled = true;
+    bool REFLECT() tick_enabled = true;
 
-  // Called before the actor updates his state
-  virtual void before_update(float delta_time) noexcept;
+    void set_name(std::string_view new_name) {
+        m_name = new_name;
+    }
 
-  // Called each time the actor needs to update it's internal state
-  virtual void update(float delta_time) noexcept;
+    std::string_view get_name() const {
+        return m_name;
+    }
+    // When this actor enters the scene
+    virtual void begin_play() noexcept;
 
-  // Called after the actor updated his state
-  virtual void after_update(float delta_time) noexcept;
+    // Called before the actor updates his state
+    virtual void before_update(float delta_time) noexcept;
 
-  // Called when the actor is actually destroyed from the scene
-  virtual void on_destroy() noexcept;
+    // Called each time the actor needs to update it's internal state
+    virtual void update(float delta_time) noexcept;
 
-  void destroy() noexcept;
-  bool is_pending_kill() const noexcept { return m_is_pending_kill; }
+    // Called after the actor updated his state
+    virtual void after_update(float delta_time) noexcept;
 
-  void set_location(const glm::vec3 &new_location) noexcept;
-  void set_rotation(const glm::quat &new_rotation) noexcept;
-  void set_scale(const glm::vec3 &new_scale) noexcept;
+    // Called when the actor is actually destroyed from the scene
+    virtual void on_destroy() noexcept;
 
-  void add_location_offset(const glm::vec3 &location_offset) noexcept;
-  void add_rotation_offset(const glm::quat &rotation_offset) noexcept;
-  void add_scale_offset(const glm::vec3 &scale_offset) noexcept;
+    void destroy() noexcept;
+    bool is_pending_kill() const noexcept { return m_is_pending_kill; }
 
-  glm::vec3 get_location() const noexcept;
-  glm::quat get_rotation() const noexcept;
-  glm::vec3 get_scale() const noexcept;
+    void set_location(const glm::vec3 &new_location) noexcept;
+    void set_rotation(const glm::quat &new_rotation) noexcept;
+    void set_scale(const glm::vec3 &new_scale) noexcept;
 
-  transform &get_transform() noexcept { return m_transform; }
+    void add_location_offset(const glm::vec3 &location_offset) noexcept;
+    void add_rotation_offset(const glm::quat &rotation_offset) noexcept;
+    void add_scale_offset(const glm::vec3 &scale_offset) noexcept;
 
-  template <typename T>
-  void add_new_component(std::shared_ptr<T> new_component) noexcept {
+    glm::vec3 get_location() const noexcept;
+    glm::quat get_rotation() const noexcept;
+    glm::vec3 get_scale() const noexcept;
+
+    transform &get_transform() noexcept { return m_transform; }
+
+    template <typename T>
+    void add_new_component(std::shared_ptr<T> new_component) noexcept {
     m_components.emplace(typeid(*new_component), std::move(new_component));
-  }
+    }
 
-  template <typename T> std::weak_ptr<T> get_component() noexcept {
+    template <typename T> std::weak_ptr<T> get_component() noexcept {
     auto component = m_components.find(typeid(T));
     if (component == m_components.end())
       return nullptr;
 
     return component->second;
-  }
-  template <typename Func> void for_each_component(Func &&func) noexcept {
+    }
+    template <typename Func> void for_each_component(Func &&func) noexcept {
     for (auto &pair : m_components) {
       func(*pair.second);
     }
-  }
+    }
 
   void serialize(class serializer &serializer) const override;
 

@@ -71,6 +71,7 @@ glm::vec3 spectacle::actor::get_scale() const noexcept {
 
 void spectacle::actor::serialize(serializer &ser) const {
     ser.begin_section("actor");
+    ser.add_parameter("name", "\"" + std::string(get_name()) + "\"");
     ser.add_parameter("prototype", "\"TODO\"");
     ser.add_parameter("location", std::to_string(get_location()));
     ser.add_parameter("rotation", std::to_string(get_rotation()));
@@ -79,4 +80,10 @@ void spectacle::actor::serialize(serializer &ser) const {
         component.second->serialize(ser);
     }
     ser.end_section("actor");
+}
+
+spectacle::actor::actor() {
+    static int id = 0;
+    m_name = std::string("Actor") + std::to_string(id);
+    id++;
 }

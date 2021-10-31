@@ -50,6 +50,9 @@ gameframework::stage_deserializer::section_type gameframework::stage_deserialize
 std::shared_ptr<spectacle::actor> gameframework::stage_deserializer::actor_from_description(gameframework::stage_deserializer::actor_descriptor& desc) {
     assert(!desc.prototype.empty());
     auto actor = std::make_shared<spectacle::actor>();
+    if(!desc.name.empty()) {
+        actor->set_name(desc.name);
+    }
     actor->set_location(desc.location);
     actor->set_rotation(desc.rotation);
     actor->set_scale(desc.scale);
@@ -88,6 +91,8 @@ void gameframework::stage_deserializer::read_param(actor_descriptor& actor_desc,
         actor_desc.rotation = read_rotation(tok);
     } else if(key.spelling == "scale") {
         actor_desc.scale = read_vec3(tok);
+    } else if(key.spelling == "name") {
+        actor_desc.name = tok.consume(tokenizer::token_type::string).spelling;
     }
 }
 
