@@ -18,14 +18,14 @@ public:
     [[nodiscard]] std::string to_string() const override = 0;
     virtual void from_string(std::string_view str) = 0;
     template<typename T>
-    bool is_resource() {
+    bool is_resource() const {
         return typeid(*this) == typeid(T);
     }
 
     template<typename T>
-    T& get() {
+    T get() const {
         assert(is_resource<T>());
-        return *reinterpret_cast<T*>(this);
+        return *reinterpret_cast<const T*>(this);
     }
 };
 

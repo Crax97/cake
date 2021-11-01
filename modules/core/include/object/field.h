@@ -16,7 +16,7 @@
 // If you're reaching this with Type = std::shared_ptr<T>
 // please ensure you're including pointer_field.h before calling
 // field_adder<Class, std::shared_ptr>
-template <typename Type> void do_visit(Type &value, field_visitor &visitor);
+template <typename Type> void do_visit(const Type &value, field_visitor &visitor);
 
 #define DECL_TYPE_INFO(Type)                                                        \
 template <> descriptor *get_descriptor_typed<Type>() {                              \
@@ -34,7 +34,7 @@ class inner_descriptor : public descriptor {                                    
 
 #define DEFINE_DO_VISIT(Type, fn)                                              \
   template <>                                                                  \
-  inline void do_visit<Type>(Type & value, field_visitor & visitor) {          \
+  inline void do_visit<Type>(const Type & value, field_visitor & visitor) {          \
     visitor.fn(value);                                                         \
   }
 
@@ -94,9 +94,9 @@ private:
   std::string m_field_name;
 
 protected:
-  virtual void *get_impl(void *base, const std::type_info &info) = 0;
-  virtual const void *get_impl(void *base,
+    virtual const void *get_impl(void *base,
                                const std::type_info &info) const = 0;
+    virtual void set_impl(void *base, const void* value, const std::type_info &info) = 0;
 
 public:
   explicit field(std::string field_name)
@@ -106,14 +106,16 @@ public:
 
     [[nodiscard]] virtual const descriptor *get_field_descriptor() const = 0;
 
-  template <typename T> T &get(void *base) {
-    return *static_cast<T *>(get_impl(base, typeid(T)));
-  }
   template <typename T> const T &get(void *const base) const {
-    return *static_cast<T *>(get_impl(base, typeid(T)));
+    return *static_cast<const T *>(get_impl(base, typeid(T)));
   }
 
-  virtual std::string to_string(const void *base) const noexcept = 0;
+  template <typename U> void set(void* base, const U& value) {
+      return set_impl(base, &value, typeid(U));
+  }
+
+
+    virtual std::string to_string(const void *base) const noexcept = 0;
   virtual void set_from_string(void *base,
                                const std::string &value) noexcept = 0;
   virtual void visit(void *base, field_visitor &visitor) = 0;
@@ -135,13 +137,6 @@ public:
     class_field(std::string field_name, Type Class::*field_ptr)
             : field(field_name), m_field_ptr(field_ptr) {}
 
-    void *get_impl(void *base, const std::type_info &info) override {
-        MIKU_ASSERT(typeid(Type) == info &&
-               "Tried to get something with the wrong type!");
-        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
-        return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
-    }
-
 
     [[nodiscard]] const descriptor *get_field_descriptor() const override {
         return get_descriptor_typed<Type>();
@@ -153,6 +148,13 @@ public:
                "Tried to get something with the wrong type!");
         MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
+    }
+
+    void set_impl(void *base, const void* value, const std::type_info &info) override {
+        MIKU_ASSERT(typeid(Type) == info &&
+                    "Tried to set something with the wrong type!");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
+        get_self(base).*m_field_ptr = *static_cast<const Type* const>(value);
     }
 
     std::string to_string(const void *base) const noexcept override {
@@ -197,7 +199,7 @@ public:
     }
 
     template<typename T>
-    std::shared_ptr<T> get_ptr(void* base) {
+    std::shared_ptr<T> get_ptr(void* base) const {
         MIKU_ASSERT(points_to<T>());
         return get<std::shared_ptr<T>>(base);
     }
@@ -218,11 +220,11 @@ public:
     pointer_field(const std::string& field_name, pointer_type Class::*field_ptr)
             : pointer_field_base(field_name), m_field_ptr(field_ptr) {}
 
-    virtual void *get_impl(void *base, const std::type_info &info) override {
+    virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         MIKU_ASSERT(typeid(pointer_type) == info &&
                "Tried to get something with the wrong type!");
         MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
-        return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
+        get_self(base).*m_field_ptr = static_cast<const pointer_type*>(value);
     }
 
 
@@ -307,11 +309,11 @@ public:
     vector_field(const std::string& field_name, VecType Class::*field_ptr)
             : container_field(field_name), m_field_ptr(field_ptr) {}
 
-    void *get_impl(void *base, const std::type_info &info) override {
+    void set_impl(void *base, const void* value, const std::type_info &info) override {
         MIKU_ASSERT(typeid(VecType) == info &&
                "Tried to get something with the wrong type!");
         MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
-        return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
+        get_self(base).*m_field_ptr = *static_cast<const VecType*>(value);
     }
 
 

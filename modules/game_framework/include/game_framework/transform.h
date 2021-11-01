@@ -90,12 +90,12 @@ public:
     [[nodiscard]] const descriptor *get_field_descriptor() const override {
           return get_descriptor_typed<glm::vec3>();
       }
-      virtual void *get_impl(void *base, const std::type_info &info) override {
+      virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
                "Tried to get something with the wrong type!");
         assert(base != nullptr && "Tried to get a property from a null");
         auto &my_transform = get_self(base).*m_field_ptr;
-        return reinterpret_cast<void *>(&my_transform.m_location);
+        my_transform.set_location(*static_cast<const glm::vec3*>(value));
       }
       virtual const void *get_impl(void *base,
                                    const std::type_info &info) const override {
@@ -143,12 +143,12 @@ public:
         [[nodiscard]] const descriptor *get_field_descriptor() const override {
             return get_descriptor_typed<glm::quat>();
         }
-      virtual void *get_impl(void *base, const std::type_info &info) override {
+      virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::quat) == info &&
                "Tried to get something with the wrong type!");
         assert(base != nullptr && "Tried to get a property from a null");
         auto &my_transform = get_self(base).*m_field_ptr;
-        return reinterpret_cast<void *>(&my_transform.m_location);
+        my_transform.set_rotation(*static_cast<const glm::quat*>(value));
       }
       virtual const void *get_impl(void *base,
                                    const std::type_info &info) const override {
@@ -196,12 +196,12 @@ public:
         [[nodiscard]] const descriptor *get_field_descriptor() const override {
             return get_descriptor_typed<glm::vec3>();
         }
-      virtual void *get_impl(void *base, const std::type_info &info) override {
+      virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
                "Tried to get something with the wrong type!");
         assert(base != nullptr && "Tried to get a property from a null");
         auto &my_transform = get_self(base).*m_field_ptr;
-        return reinterpret_cast<void *>(&my_transform.m_scale);
+        my_transform.set_scale(*static_cast<const glm::vec3*>(value));
       }
       virtual const void *get_impl(void *base,
                                    const std::type_info &info) const override {
