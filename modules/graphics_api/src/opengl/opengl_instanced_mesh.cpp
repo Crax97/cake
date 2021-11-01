@@ -2,10 +2,9 @@
 #include "shader.h"
 
 #include "glad/glad.h"
-#include <cassert>
 #include <cstring>
 #include <memory>
-#include <stdio.h>
+#include <logging/logger.h>
 
 struct gl_attrib_format {
   GLenum type;
@@ -166,9 +165,9 @@ void renderer::opengl_instanced_mesh::draw() const noexcept {
   draw(current_element_count);
 }
 void renderer::opengl_instanced_mesh::draw(int instance_count) const noexcept {
-  assert(instance_count <= current_element_count);
-  glUseProgram(m_associated_program);
-  m_mesh->bind();
-  glDrawElementsInstanced(GL_TRIANGLES, m_mesh->element_count(),
+    MIKU_ASSERT(instance_count <= current_element_count);
+    glUseProgram(m_associated_program);
+    m_mesh->bind();
+    glDrawElementsInstanced(GL_TRIANGLES, m_mesh->element_count(),
                           GL_UNSIGNED_INT, nullptr, instance_count);
 }

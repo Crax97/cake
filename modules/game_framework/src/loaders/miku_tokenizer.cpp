@@ -4,7 +4,7 @@
 
 #include "game_framework/loaders/miku_tokenizer.h"
 
-#include <cassert>
+#include "logging/logger.h"
 
 void gameframework::miku_tokenizer::tokenize() {
     while(m_stream.good() && m_stream.peek() != EOF) {
@@ -62,11 +62,11 @@ void gameframework::miku_tokenizer::read_number() {
 
 void gameframework::miku_tokenizer::read_string() {
     std::string token;
-    assert(m_stream.get() == '"');
+    MIKU_ASSERT(m_stream.get() == '"');
     while(m_stream.peek() != '"') {
         token += static_cast<char>(m_stream.get());
     }
-    assert(m_stream.get() == '"');
+    MIKU_ASSERT(m_stream.get() == '"');
     push({token_type::string, token});
 }
 
@@ -83,6 +83,6 @@ const gameframework::token &gameframework::miku_tokenizer::peek() const {
 gameframework::token
 gameframework::miku_tokenizer::consume(token_type type) {
     auto n = next();
-    assert(n.type == type);
+    MIKU_ASSERT(n.type == type);
     return n;
 }

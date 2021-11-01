@@ -1,7 +1,6 @@
 #pragma once
 
 #include "extensions/std_extensions.h"
-#include <cassert>
 #include <iomanip>
 #include <ostream>
 #include <string>

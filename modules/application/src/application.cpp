@@ -1,17 +1,18 @@
 #include "application.h"
 
-#include <cassert>
-
 #include "SDL_events.h"
 #include "api_factory.h"
 #include "graphics_api.h"
 #include "input/inputsystem.h"
 #include "window.h"
 
+#include "logging/logger.h"
+static logging::category logApplication("application");
+
 static app_framework::application *g_the_application{nullptr};
 app_framework::application::application(int argc, char **argv) noexcept {
-  assert(!g_the_application);
-  g_the_application = this;
+    MIKU_ASSERT(!g_the_application);
+    g_the_application = this;
 }
 
 void app_framework::application::setup() noexcept {

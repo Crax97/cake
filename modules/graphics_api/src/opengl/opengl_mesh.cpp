@@ -1,7 +1,7 @@
+#include <logging/logger.h>
 #include "opengl_mesh.h"
 #include "glad/glad.h"
 #include "opengl_shader.h"
-#include <cassert>
 
 void renderer::opengl_mesh::add_face(const renderer::face &face) noexcept {}
 
@@ -68,7 +68,7 @@ renderer::opengl_mesh::~opengl_mesh() noexcept {
   if (normal_buffer != 0)
     glDeleteBuffers(1, &normal_buffer);
 
-  assert(!glIsBuffer(vertex_buffer) && !glIsBuffer(texcoord_buffer) &&
+    MIKU_ASSERT(!glIsBuffer(vertex_buffer) && !glIsBuffer(texcoord_buffer) &&
          !glIsBuffer(normal_buffer) && !glIsBuffer(element_buffer));
 
   glDeleteVertexArrays(1, &mesh_vao);

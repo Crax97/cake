@@ -18,6 +18,7 @@ std::string_view severity_to_escape_sequence(logging::severity sev) {
         case logging::severity::fatal:
             return "\u001b[31m";
     }
+    return "\u001b[32m";
 }
 
 logging::category::message logging::category::operator()(logging::severity sev) {

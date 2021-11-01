@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cassert>
 #include <memory>
 #include <string>
 #include <typeinfo>
@@ -12,6 +11,7 @@
 #include "extensions/std_extensions.h"
 #include "field_visitor.h"
 #include "glm/gtc/quaternion.hpp"
+#include "logging/logger.h"
 
 // If you're reaching this with Type = std::shared_ptr<T>
 // please ensure you're including pointer_field.h before calling
@@ -136,9 +136,9 @@ public:
             : field(field_name), m_field_ptr(field_ptr) {}
 
     void *get_impl(void *base, const std::type_info &info) override {
-        assert(typeid(Type) == info &&
+        MIKU_ASSERT(typeid(Type) == info &&
                "Tried to get something with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
     }
 
@@ -149,9 +149,9 @@ public:
 
     const void *get_impl(void *base,
                                  const std::type_info &info) const override {
-        assert(typeid(Type) == info &&
+        MIKU_ASSERT(typeid(Type) == info &&
                "Tried to get something with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
     }
 
@@ -198,7 +198,7 @@ public:
 
     template<typename T>
     std::shared_ptr<T> get_ptr(void* base) {
-        assert(points_to<T>());
+        MIKU_ASSERT(points_to<T>());
         return get<std::shared_ptr<T>>(base);
     }
 };
@@ -219,9 +219,9 @@ public:
             : pointer_field_base(field_name), m_field_ptr(field_ptr) {}
 
     virtual void *get_impl(void *base, const std::type_info &info) override {
-        assert(typeid(pointer_type) == info &&
+        MIKU_ASSERT(typeid(pointer_type) == info &&
                "Tried to get something with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
     }
 
@@ -235,9 +235,9 @@ public:
 
     virtual const void *get_impl(void *base,
                                  const std::type_info &info) const override {
-        assert(typeid(pointer_type) == info &&
+        MIKU_ASSERT(typeid(pointer_type) == info &&
                "Tried to get something with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
     }
 
@@ -280,7 +280,7 @@ public:
 
     template<typename T>
     T& get_instance(void* base, int index) {
-        assert(contains<T>());
+        MIKU_ASSERT(contains<T>());
         return *static_cast<T*>(get_instance_internal(base, index));
     }
 };
@@ -308,9 +308,9 @@ public:
             : container_field(field_name), m_field_ptr(field_ptr) {}
 
     void *get_impl(void *base, const std::type_info &info) override {
-        assert(typeid(VecType) == info &&
+        MIKU_ASSERT(typeid(VecType) == info &&
                "Tried to get something with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<void *>(&(get_self(base).*m_field_ptr));
     }
 
@@ -324,9 +324,9 @@ public:
 
     const void *get_impl(void *base,
                          const std::type_info &info) const override {
-        assert(typeid(VecType) == info &&
+        MIKU_ASSERT(typeid(VecType) == info &&
                "Tried to get vector_type with the wrong type!");
-        assert(base != nullptr && "Tried to get a property from a null");
+        MIKU_ASSERT(base != nullptr && "Tried to get a property from a null");
         return reinterpret_cast<const void *>(&(get_self(base).*m_field_ptr));
     }
 

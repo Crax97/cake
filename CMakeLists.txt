@@ -14,6 +14,7 @@ git_update_modules()
 
 include_directories(generated_headers)
 
+add_subdirectory(modules/loglib)
 add_subdirectory(modules/core)
 add_subdirectory(modules/game_framework)
 add_subdirectory(modules/graphics_api)

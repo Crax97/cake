@@ -1,6 +1,7 @@
 #pragma once
 
-#include <cassert>
+#include "logging/logger.h"
+
 #include <list>
 #include <memory>
 #include <optional>
@@ -29,6 +30,6 @@ public:
 };
 
 template <typename T> descriptor *get_descriptor_typed() {
-  assert(false && "This shouldn't be reached");
+  MIKU_ASSERT(false && "This shouldn't be reached");
   return nullptr;
 }

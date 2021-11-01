@@ -2,7 +2,6 @@
 
 #include "descriptor.h"
 #include "serializer.h"
-#include <cassert>
 
 #include <list>
 #include <memory>

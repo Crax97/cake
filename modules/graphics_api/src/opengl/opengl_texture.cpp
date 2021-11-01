@@ -1,12 +1,12 @@
 #include "opengl_texture.h"
 
-#include <cassert>
 #include <glad/glad.h>
+#include <logging/logger.h>
 
 renderer::opengl_texture::opengl_texture(GLuint tex_id, int width,
                                          int height) noexcept
     : texture(width, height), m_texture(tex_id) {
-  assert(glIsTexture(tex_id));
+    MIKU_ASSERT(glIsTexture(tex_id));
 }
 
 renderer::opengl_texture::~opengl_texture() noexcept {

@@ -9,7 +9,6 @@
 
 #include <SDL2/SDL_video.h>
 
-#include <cassert>
 #include <iostream>
 
 #include <glad/glad.h>
@@ -113,17 +112,17 @@ void APIENTRY gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
 
 renderer::opengl_graphics_api::opengl_graphics_api(
     SDL_Window *Window) noexcept {
-  assert(Window);
-  this->GLContext = SDL_GL_CreateContext(Window);
-  this->Window = Window;
-  assert(this->GLContext);
+    MIKU_ASSERT(Window);
+    this->GLContext = SDL_GL_CreateContext(Window);
+    this->Window = Window;
+    MIKU_ASSERT(this->GLContext);
 
-  SDL_GL_MakeCurrent(this->Window, this->GLContext);
-  assert(gladLoadGL() == 1);
-  glEnable(GL_BLEND);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_STENCIL_TEST);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    SDL_GL_MakeCurrent(this->Window, this->GLContext);
+    MIKU_ASSERT(gladLoadGL() == 1);
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #ifdef DEBUG
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -220,29 +219,28 @@ renderer::opengl_graphics_api::create_texture(
   GLenum gl_pixel_format, gl_type;
   GLint gl_internal_format;
   switch (format) {
-
-  case texture_format::rgb:
+    case texture_format::rgb:
     gl_internal_format = GL_RGB;
     gl_type = GL_UNSIGNED_BYTE;
     gl_pixel_format = GL_RGB;
     break;
-  case texture_format::rgba:
+    case texture_format::rgba:
     gl_internal_format = GL_RGBA;
     gl_type = GL_UNSIGNED_BYTE;
     gl_pixel_format = GL_RGBA;
     break;
-  case texture_format::red:
+    case texture_format::red:
     gl_internal_format = GL_RGBA;
     gl_type = GL_UNSIGNED_BYTE;
     gl_pixel_format = GL_RED;
     break;
-  case texture_format::depth_texture:
+    case texture_format::depth_texture:
     gl_internal_format = GL_DEPTH_COMPONENT32F;
     gl_type = GL_FLOAT;
     gl_pixel_format = GL_DEPTH_COMPONENT;
     break;
-  case texture_format::unknown:
-    assert(false);
+    case texture_format::unknown:
+    MIKU_ASSERT(false);
   }
 
   GLuint tex_id;

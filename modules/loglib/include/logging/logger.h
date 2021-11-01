@@ -43,3 +43,12 @@ namespace logging {
         message operator()(severity sev = severity::info);
     };
 }
+
+static logging::category assertions("assertions");
+
+#define MIKU_ASSERT(expr)                                                                                               \
+if(!(expr)) {                                                                                                           \
+    assertions(logging::severity::fatal) << "Assertion failed!\n" <<                                                    \
+    "On line " << __FILE__ << ":" << __LINE__ << #expr;                                                                 \
+}                                                                                                                       \
+

@@ -12,5 +12,6 @@ set(CORE_SOURCES
 )
 add_library(core STATIC ${CORE_SOURCES})
 target_include_directories(core PUBLIC ${CORE_INCLUDE_DIRS} ${GLM_HEADERS})
+target_link_libraries(core loglib)
 
 set(CORE_EXPORTED_DIRS ${CORE_INCLUDE_DIRS} PARENT_SCOPE)

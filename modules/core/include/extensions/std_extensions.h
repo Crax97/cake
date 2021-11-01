@@ -1,9 +1,10 @@
 #pragma once
 
-#include <cassert>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "logging/logger.h"
 
 #include "glm/glm.hpp"
 
@@ -11,7 +12,7 @@ class object;
 
 namespace std {
 template <typename T> T from_string(const std::string &s) {
-  assert(false && "This shouldn't be reached");
+  MIKU_ASSERT(false && "This shouldn't be reached");
   return T();
 }
 

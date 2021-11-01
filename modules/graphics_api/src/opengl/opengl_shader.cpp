@@ -1,9 +1,12 @@
 #include "opengl_shader.h"
 #include "opengl_texture.h"
 
-#include <cassert>
+#include "logging/logger.h"
+
 #include <glad/glad.h>
 #include <iostream>
+
+static logging::category logGl_shader("logGl-shader");
 
 renderer::opengl_shader::opengl_shader(GLuint vs, GLuint fs) noexcept {
   m_program = glCreateProgram();
@@ -23,8 +26,8 @@ renderer::opengl_shader::opengl_shader(GLuint vs, GLuint fs) noexcept {
     char buf[2049];
     GLint len;
     glGetProgramInfoLog(m_program, 2048, &len, buf);
-    std::cout << "Error compiling shading program " << m_program
-              << std::string(buf, len) << "\n";
+    logGl_shader(logging::severity::error) << "Error compiling shading program " << m_program
+              << std::string(buf, len);
     glDeleteProgram(m_program);
     m_program = 0;
   }
