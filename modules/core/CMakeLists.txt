@@ -9,7 +9,7 @@ set(CORE_SOURCES
         src/descriptor.cpp
         src/resource.cpp
     src/std_extensions.cpp
-)
+        include/object/function.h)
 add_library(core STATIC ${CORE_SOURCES})
 target_include_directories(core PUBLIC ${CORE_INCLUDE_DIRS} ${GLM_HEADERS})
 target_link_libraries(core loglib)

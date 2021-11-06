@@ -123,6 +123,44 @@ public:
   virtual ~field()= default;
 };
 
+
+template<typename T>
+field* field_of() {
+    class simple_field : public field {
+    public:
+        [[nodiscard]] const descriptor *get_field_descriptor() const override {
+            return get_descriptor_typed<T>();
+        }
+
+        std::string to_string(const void *base) const noexcept override {
+            return std::to_string(*static_cast<const T *>(base));
+        }
+
+        void set_from_string(void *base, const std::string &value) noexcept override {
+            *static_cast<T *>(base) = std::from_string<T>(value);
+        }
+
+        void visit(void *base, field_visitor &visitor) override {
+            do_visit<T>(*static_cast<T *>(base), visitor);
+        }
+
+    protected:
+        const void *get_impl(void *base, const std::type_info &info) const override {
+            return base;
+        }
+
+        void set_impl(void *base, const void *value, const std::type_info &info) override {
+            MIKU_ASSERT(typeid(T) == info);
+            *static_cast<T *>(base) = *static_cast<const T *>(value);
+        }
+    public:
+        simple_field()
+            : field(typeid(T).name()) { }
+    };
+    static simple_field field;
+    return &field;
+}
+
 template<typename Class, typename Type>
 class class_field : public field {
     Type Class::*m_field_ptr;
