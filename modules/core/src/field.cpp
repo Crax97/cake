@@ -16,3 +16,8 @@ DECL_TYPE_INFO(glm::vec2)
 DECL_TYPE_INFO(glm::vec3)
 DECL_TYPE_INFO(glm::vec4)
 DECL_TYPE_INFO(glm::quat)
+
+template<>
+void do_visit<char const*>(char const* const& value, field_visitor & visitor) {
+    visitor.visit_string_property(value);
+}

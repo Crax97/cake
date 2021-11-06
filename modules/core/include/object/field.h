@@ -133,7 +133,11 @@ field* field_of() {
         }
 
         std::string to_string(const void *base) const noexcept override {
-            return std::to_string(*static_cast<const T *>(base));
+            if constexpr(std::is_constructible_v<std::string, T>) {
+                return std::string(*static_cast<const T *>(base));
+            } else {
+                return std::to_string(*static_cast<const T *>(base));
+            }
         }
 
         void set_from_string(void *base, const std::string &value) noexcept override {

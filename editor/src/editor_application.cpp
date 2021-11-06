@@ -22,6 +22,7 @@
 #include "input/keys.h"
 #include "mesh.h"
 #include "window.h"
+#include "object/function.h"
 
 #include <iostream>
 #include <memory>
@@ -207,7 +208,6 @@ void editor_application::render_world() noexcept {
 
 void editor_application::on_app_startup() noexcept {
   game::on_app_startup();
-
   m_framebuffer = get_api().create_framebuffer(1240, 720);
 
   m_imgui_context = ImGui::CreateContext();
