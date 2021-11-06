@@ -14,9 +14,9 @@ float my_pow(float base, float exp) {
 
 TEST_CASE("Function calling", "[functions]") {
     SECTION("Function creation though lambdas") {
-        auto fun = create_callable([](int a, int b) {
+        auto fun = create_callable(std::function([](int a, int b) {
             return a + b;
-        });
+        }));
 
         auto result = fun->call(10, 20);
         REQUIRE(std::holds_alternative<function_call_result>(result));
@@ -51,10 +51,14 @@ TEST_CASE("Class method binding", "methods") {
         [[nodiscard]] int bar(int a) const {
             return x + a;
         }
+
+        static void say_hi() {
+            std::cout << "Hello World\n";
+        }
     };
     SECTION("Method call with bound object") {
         foo f{10};
-        auto method = create_method(&foo::bar);
+        auto method = create_callable(&foo::bar);
         method->bind(&f);
 
         auto result = method->call(10);
@@ -67,7 +71,14 @@ TEST_CASE("Class method binding", "methods") {
     }
     SECTION("Method call without bound object") {
         foo f{10};
-        auto method = create_method(&foo::bar);
+        auto method = create_callable(&foo::bar);
+
+        auto result = method->call(10);
+        REQUIRE(std::holds_alternative<std::string>(result));
+    }
+    SECTION("static method") {
+        foo f{10};
+        auto method = create_callable(&foo::say_hi);
 
         auto result = method->call(10);
         REQUIRE(std::holds_alternative<std::string>(result));
