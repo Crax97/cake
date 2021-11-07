@@ -46,59 +46,61 @@ void editor::actor_editor::draw_editor() noexcept {
     ImGui::PopID();
 }
 
-void draw_property(field *prop,
+void draw_property(std::string_view prop_name, field *prop,
                    const std::weak_ptr<spectacle::component>& component) {
       class imgui_drawer : public field_visitor {
       public:
+            std::string_view m_prop_name;
             field *m_prop;
             std::weak_ptr<spectacle::component>  m_comp;
-            explicit imgui_drawer(field *in_prop, std::weak_ptr<spectacle::component> in_comp) : m_prop(in_prop), m_comp(std::move(in_comp)) {}
+            explicit imgui_drawer(std::string_view in_prop_name, field *in_prop, std::weak_ptr<spectacle::component> in_comp)
+                : m_prop_name(in_prop_name), m_prop(in_prop), m_comp(std::move(in_comp)) {}
 
             void visit_bool_property(const bool &value) override {
                 auto copy = value;
-                if(ImGui::Checkbox(m_prop->get_name().c_str(), &copy)) {
+                if(ImGui::Checkbox(m_prop_name.data(), &copy)) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_int_property(const int &value) override {
                 auto copy = value;
-                if(ImGui::InputInt(m_prop->get_name().c_str(), &copy)) {
+                if(ImGui::InputInt(m_prop_name.data(), &copy)) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_double_property(const double &value) override {
                 auto copy = value;
-                if(ImGui::InputDouble(m_prop->get_name().c_str(), &copy)) {
+                if(ImGui::InputDouble(m_prop_name.data(), &copy)) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_float_property(const float &value) override {
                 auto copy = value;
-                if(ImGui::InputFloat(m_prop->get_name().c_str(), &copy)) {
+                if(ImGui::InputFloat(m_prop_name.data(), &copy)) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_string_property(const std::string &value) override {
                 std::string copy = value;
-                if(ImGui::InputText(m_prop->get_name().c_str(), &copy, ImGuiInputTextFlags_None)) {
+                if(ImGui::InputText(m_prop_name.data(), &copy, ImGuiInputTextFlags_None)) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_vec2_property(const glm::vec2 &value) override {
                 auto copy = value;
-                if(ImGui::DragFloat2(m_prop->get_name().c_str(), &copy[0])) {
+                if(ImGui::DragFloat2(m_prop_name.data(), &copy[0])) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_vec3_property(const glm::vec3 &value) override {
                 auto copy = value;
-                if(ImGui::DragFloat3(m_prop->get_name().c_str(), &copy[0])) {
+                if(ImGui::DragFloat3(m_prop_name.data(), &copy[0])) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
             void visit_vec4_property(const glm::vec4 &value) override {
                 auto copy = value;
-                if(ImGui::DragFloat4(m_prop->get_name().c_str(), &copy[0])) {
+                if(ImGui::DragFloat4(m_prop_name.data(), &copy[0])) {
                     m_prop->set(m_comp.lock().get(), copy);
                 }
             }
@@ -109,6 +111,8 @@ void draw_property(field *prop,
 
             }
             void visit_resource_property(const class resource& res) override {
+                ImGui::Text("%s", m_prop_name.data());
+                ImGui::SameLine();
                 if(res.is_resource<game_framework::texture_resource>()) {
                     auto texture_res = res.get<game_framework::texture_resource>();
                     if(texture_res) {
@@ -145,7 +149,7 @@ void draw_property(field *prop,
               // ImGui::Image(value.get_texture_object(), ImVec2(100, 100));
     };
 
-    auto drawer = imgui_drawer{prop, component};
+    auto drawer = imgui_drawer{prop_name, prop, component};
     prop->visit(component.lock().get(), drawer);
 }
 
@@ -187,7 +191,7 @@ void editor::actor_editor::show_actor_components(
     }
     ImGui::Indent(1);
     for (auto &field : component->get_descriptor()->get_fields()) {
-      draw_property(field.get(), component);
+      draw_property(field.first, field.second.get(), component);
     }
     ImGui::Indent(-1);
   });

@@ -8,6 +8,7 @@
 #include <glm/mat4x4.hpp>
 
 #include "object/field.h"
+#include "object/descriptor.h"
 #include <memory>
 
 namespace spectacle {
@@ -85,10 +86,10 @@ public:
 
     public:
       location_field(transform Class::*field_ptr)
-          : field("location"), m_field_ptr(field_ptr) {}
+          : m_field_ptr(field_ptr) {}
 
-    [[nodiscard]] const descriptor *get_field_descriptor() const override {
-          return get_descriptor_typed<glm::vec3>();
+    [[nodiscard]] const std::type_info& get_type() const override {
+          return typeid(glm::vec3);
       }
       virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
@@ -139,10 +140,12 @@ public:
 
     public:
       rotation_field(transform Class::*field_ptr)
-          : field("rotation"), m_field_ptr(field_ptr) {}
-        [[nodiscard]] const descriptor *get_field_descriptor() const override {
-            return get_descriptor_typed<glm::quat>();
+          : m_field_ptr(field_ptr) {}
+
+        [[nodiscard]] const std::type_info& get_type() const override {
+            return typeid(glm::quat);
         }
+
       virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::quat) == info &&
                "Tried to get something with the wrong type!");
@@ -192,10 +195,12 @@ public:
 
     public:
       scale_field(transform Class::*field_ptr)
-          : field("scale"), m_field_ptr(field_ptr) {}
-        [[nodiscard]] const descriptor *get_field_descriptor() const override {
-            return get_descriptor_typed<glm::vec3>();
+          : m_field_ptr(field_ptr) {}
+
+        [[nodiscard]] const std::type_info& get_type() const override {
+            return typeid(glm::vec3);
         }
+
       virtual void set_impl(void *base, const void* value, const std::type_info &info) override {
         assert(typeid(glm::vec3) == info &&
                "Tried to get something with the wrong type!");
@@ -237,13 +242,12 @@ template<typename Class>
 class field_adder<Class, spectacle::transform> {
 
 public:
-    void operator()(
-            std::list<std::unique_ptr<field>> &fields, const std::string &member_name, spectacle::transform Class::* ptr) {
+    void operator()(std::unordered_map<std::string, std::unique_ptr<field>> &fields, const std::string &member_name, spectacle::transform Class::* ptr) {
         auto loc_field = spectacle::transform::make_transform_field_location(ptr);
         auto rot_field = spectacle::transform::make_transform_field_rotation(ptr);
         auto scale_field = spectacle::transform::make_transform_field_scale(ptr);
-        fields.emplace_back(std::move(loc_field));
-        fields.emplace_back(std::move(rot_field));
-        fields.emplace_back(std::move(scale_field));
+        fields.emplace("location", std::move(loc_field));
+        fields.emplace("rotation", std::move(rot_field));
+        fields.emplace("scale", std::move(scale_field));
     }
 };

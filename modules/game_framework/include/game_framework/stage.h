@@ -9,7 +9,7 @@
 namespace spectacle {
 class actor;
 class REFLECT() stage : public object {
-    GENERATE_REFLECT_BODY(stage)
+    CORE_GENERATE_BODY(stage)
 private:
   std::vector<std::shared_ptr<actor>> REFLECT() m_actor_list;
 

@@ -15,7 +15,7 @@ class actor;
 
 namespace gameframework {
 class REFLECT() sprite_component : public rendering_component {
-    GENERATE_REFLECT_BODY(sprite_component)
+    CORE_GENERATE_BODY(sprite_component)
 private:
   game_framework::texture_resource REFLECT() m_texture;
   glm::vec2 REFLECT() m_sprite_scale{1};

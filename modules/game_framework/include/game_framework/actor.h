@@ -15,7 +15,7 @@ namespace spectacle {
 class component;
 
 class REFLECT() actor : public object, public std::enable_shared_from_this<actor> {
-  GENERATE_REFLECT_BODY(actor)
+  CORE_GENERATE_BODY(actor)
     friend class stage;
 private:
   bool m_is_pending_kill = false;
@@ -24,8 +24,8 @@ private:
   bool m_is_prototype = false;
 
 protected:
-  transform REFLECT() m_transform;
 
+    transform REFLECT() m_transform;
 public:
     actor();
     std::string REFLECT() m_name;
