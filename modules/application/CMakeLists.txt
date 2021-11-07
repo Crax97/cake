@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(APPLICATION_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 set(APPLICATION_SOURCES 
     src/application.cpp
-)
+        ../luanatic/include/luanatic/script.h ../luanatic/include/luanatic/lua.hpp)
 set(APPFRAMEWORK_EXPORTED_DIRS ${APPLICATION_INCLUDE_DIRS} PARENT_SCOPE)
 
 add_library(application ${APPLICATION_SOURCES})
