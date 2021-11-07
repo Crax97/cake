@@ -3,11 +3,10 @@
 #include <memory>
 #include <string>
 #include <typeinfo>
-#include <list>
+#include <unordered_map>
 #include <utility>
 #include <type_traits>
 
-#include "descriptor.h"
 #include "extensions/std_extensions.h"
 #include "field_visitor.h"
 #include "glm/gtc/quaternion.hpp"
@@ -17,20 +16,6 @@
 // please ensure you're including pointer_field.h before calling
 // field_adder<Class, std::shared_ptr>
 template <typename Type> void do_visit(const Type &value, field_visitor &visitor);
-
-#define DECL_TYPE_INFO(Type)                                                        \
-template <> descriptor *get_descriptor_typed<Type>() {                              \
-class inner_descriptor : public descriptor {                                        \
-    public:                                                                         \
-    inner_descriptor(const std::string& name, [[maybe_unused]] size_t type_size):   \
-        descriptor(name, nullptr) {}                                                \
-        const std::type_info& get_typeinfo() const override {                       \
-            return typeid(Type);                                                    \
-        }                                                                           \
-    };                                                                              \
-    static inner_descriptor info{#Type, sizeof(Type)};                              \
-    return &info;                                                                   \
-  };
 
 #define DEFINE_DO_VISIT(Type, fn)                                              \
   template <>                                                                  \
@@ -90,21 +75,13 @@ namespace object_utilities {
 }
 
 class field {
-private:
-  std::string m_field_name;
-
 protected:
     virtual const void *get_impl(void *base,
                                const std::type_info &info) const = 0;
     virtual void set_impl(void *base, const void* value, const std::type_info &info) = 0;
 
 public:
-  explicit field(std::string field_name)
-      : m_field_name(std::move(field_name)) {}
-
-  [[nodiscard]] const std::string &get_name() const { return m_field_name; }
-
-    [[nodiscard]] virtual const descriptor *get_field_descriptor() const = 0;
+    [[nodiscard]] virtual const std::type_info& get_type() const = 0;
 
   template <typename T> const T &get(void *const base) const {
     return *static_cast<const T *>(get_impl(base, typeid(T)));
@@ -120,7 +97,7 @@ public:
                                const std::string &value) noexcept = 0;
   virtual void visit(void *base, field_visitor &visitor) = 0;
 
-  virtual ~field()= default;
+  virtual ~field();
 };
 
 
@@ -128,8 +105,8 @@ template<typename T>
 field* field_of() {
     class simple_field : public field {
     public:
-        [[nodiscard]] const descriptor *get_field_descriptor() const override {
-            return get_descriptor_typed<T>();
+        [[nodiscard]] const std::type_info& get_type()const override {
+            return typeid(T);
         }
 
         std::string to_string(const void *base) const noexcept override {
@@ -157,9 +134,6 @@ field* field_of() {
             MIKU_ASSERT(typeid(T) == info);
             *static_cast<T *>(base) = *static_cast<const T *>(value);
         }
-    public:
-        simple_field()
-            : field(typeid(T).name()) { }
     };
     static simple_field field;
     return &field;
@@ -176,12 +150,12 @@ class class_field : public field {
     }
 
 public:
-    class_field(std::string field_name, Type Class::*field_ptr)
-            : field(field_name), m_field_ptr(field_ptr) {}
+    class_field(Type Class::*field_ptr)
+            : m_field_ptr(field_ptr) {}
 
 
-    [[nodiscard]] const descriptor *get_field_descriptor() const override {
-        return get_descriptor_typed<Type>();
+    [[nodiscard]] const std::type_info& get_type()const override {
+        return typeid(Type);
     }
 
     const void *get_impl(void *base,
@@ -232,12 +206,11 @@ public:
 
 class pointer_field_base : public field {
 public:
-    explicit pointer_field_base(const std::string& name)
-            : field(name) { }
-    [[nodiscard]] virtual const descriptor* get_inner_type() const = 0;
+    explicit pointer_field_base(const std::string& name) { }
+    [[nodiscard]] virtual const std::type_info& get_inner_type() const = 0;
     template<typename T>
     [[nodiscard]] bool points_to() const {
-        return typeid(T) == get_inner_type()->get_typeinfo();
+        return typeid(T) == get_inner_type();
     }
 
     template<typename T>
@@ -270,11 +243,12 @@ public:
     }
 
 
-    [[nodiscard]] const descriptor *get_field_descriptor() const override {
-        return get_descriptor_typed<T>();
+    [[nodiscard]] const std::type_info& get_type() const override {
+        return typeid(pointer_type);
     }
-    [[nodiscard]] const descriptor *get_inner_type() const override {
-        return get_descriptor_typed<T>();
+
+    [[nodiscard]] const std::type_info& get_inner_type() const override {
+        return typeid(T);
     }
 
     virtual const void *get_impl(void *base,
@@ -314,12 +288,11 @@ protected:
     virtual void* get_instance_internal(void* base, int index)  = 0;
 
 public:
-    explicit container_field(const std::string& name)
-            : field(name) { }
-    [[nodiscard]] virtual const descriptor* get_inner_type() const = 0;
+    explicit container_field() { }
+    [[nodiscard]] virtual const std::type_info& get_inner_type() const = 0;
     template<typename T>
     [[nodiscard]] bool contains() const {
-        return typeid(T) == get_inner_type()->get_typeinfo();
+        return typeid(T) == get_inner_type();
     }
 
     template<typename T>
@@ -348,8 +321,8 @@ protected:
     }
 
 public:
-    vector_field(const std::string& field_name, VecType Class::*field_ptr)
-            : container_field(field_name), m_field_ptr(field_ptr) {}
+    explicit vector_field(VecType Class::*field_ptr)
+            : m_field_ptr(field_ptr) {}
 
     void set_impl(void *base, const void* value, const std::type_info &info) override {
         MIKU_ASSERT(typeid(VecType) == info &&
@@ -359,11 +332,11 @@ public:
     }
 
 
-    [[nodiscard]] const descriptor *get_field_descriptor() const override {
-        return get_descriptor_typed<VecType>();
+    [[nodiscard]] const std::type_info& get_inner_type() const override {
+        return typeid(inner_type);
     }
-    [[nodiscard]] const descriptor *get_inner_type() const override {
-        return get_descriptor_typed<VecType>();
+    [[nodiscard]] const std::type_info& get_type() const override {
+        return typeid(VecType);
     }
 
     const void *get_impl(void *base,
@@ -405,14 +378,13 @@ template <typename Class, typename Type>
 class field_adder {
 
 public:
-        void operator()(
-                std::list<std::unique_ptr<field>> &fields, const std::string &member_name, Type Class::* ptr) {
+        void operator()(std::unordered_map<std::string, std::unique_ptr<field>> &fields, const std::string &member_name, Type Class::* ptr) {
             if constexpr(object_utilities::is_smart_pointer<Type>) {
-                fields.emplace_back(std::make_unique<pointer_field<Class, Type>>(member_name, ptr));
+                fields.emplace(member_name, std::make_unique<pointer_field<Class, Type>>(ptr));
             } else if constexpr(object_utilities::is_vector<Type>) {
-                fields.emplace_back(std::make_unique<vector_field<Class, Type>>(member_name, ptr));
+                fields.emplace(member_name, std::make_unique<vector_field<Class, Type>>(ptr));
             } else {
-                fields.emplace_back(std::make_unique<class_field<Class, Type>>(member_name, ptr));
+                fields.emplace(member_name, std::make_unique<class_field<Class, Type>>(ptr));
             }
         }
 };

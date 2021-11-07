@@ -12,7 +12,7 @@
 #include <typeinfo>
 
 class resource : public object {
-GENERATE_REFLECT_BODY(resource)
+CORE_GENERATE_BODY(resource)
 protected:
 public:
     [[nodiscard]] std::string to_string() const override = 0;

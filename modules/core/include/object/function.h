@@ -3,13 +3,15 @@
 //
 
 #pragma once
-#include "field.h"
 
 #include <optional>
 #include <variant>
 #include <functional>
+#include <memory>
 
-#include <iostream>
+#include "object/field.h"
+
+class field;
 
 class bound_field {
 protected:
@@ -89,49 +91,49 @@ namespace function_util {
                               const std::vector<std::unique_ptr<bound_field>> &fields, std::index_sequence<I...>) {
         return (instance.*fun)(unpack_field<Args>(fields, I)...);
     }
-    // namespace function_util
-    class callable {
-    protected:
-        std::vector<field *> m_parameters;
-        std::optional<field *> m_return_type;
+} // namespace function_util
 
-        virtual result_type call_internal(const std::vector<std::unique_ptr<bound_field>> &fields) = 0;
+class callable {
+protected:
+    std::vector<field *> m_parameters;
+    std::optional<field *> m_return_type;
 
-    public:
+    virtual result_type call_internal(const std::vector<std::unique_ptr<bound_field>> &fields) = 0;
+    bool ensure_params_same_type(const std::vector<std::unique_ptr<bound_field>>& params);
 
-        template<typename... Args>
-        result_type call(Args... args) {
-            if (sizeof...(Args) < m_parameters.size()) {
-                return "Size mismatch!";
-            }
-            std::vector<std::unique_ptr<bound_field>> parameters = pack_to_params(args...);
-            auto in_param = parameters.begin();
-            for (auto &m_parameter: m_parameters) {
-                const auto &in_param_type = m_parameter->get_field_descriptor()->get_typeinfo();
-                const auto &this_param_type = (*in_param)->get_field_type()->get_field_descriptor()->get_typeinfo();
-                if (in_param_type != this_param_type) {
-                    return "Different field types!";
-                }
-                in_param++;
-            }
-            return call_internal(parameters);
+public:
+
+    template<typename... Args>
+    result_type call(Args... args) {
+        if (sizeof...(Args) < m_parameters.size()) {
+            return "Size mismatch!";
         }
-    };
-
-    class method : public callable {
-    protected:
-        void *m_target{nullptr};
-    public:
-        virtual void bind(void *target) {
-            m_target = target;
+        std::vector<std::unique_ptr<bound_field>> parameters = function_util::pack_to_params(args...);
+        auto in_param = parameters.begin();
+        if(!ensure_params_same_type(parameters)) {
+            return "Different field types";
         }
+        return call_internal(parameters);
+    }
 
-        template<typename Class>
-        void bind(Class &instance) {
-            bind(&instance);
-        }
-    };
+    virtual ~callable() = default;
+};
 
+class method : public callable {
+protected:
+    void *m_target{nullptr};
+public:
+    virtual void bind(void *target) {
+        m_target = target;
+    }
+
+    template<typename Class>
+    void bind(Class &instance) {
+        bind(&instance);
+    }
+};
+
+namespace function_util {
     template<typename Return, typename Class, typename... Args>
     std::unique_ptr<method> create_method(Return (Class::*method)(Args...))  {
         class internal_method : public method {
@@ -196,9 +198,6 @@ namespace function_util {
     }
 
 }
-
-using callable = function_util::callable;
-using method = function_util::method;
 
 template<typename Return, typename... Args>
 std::unique_ptr<callable> create_callable(const std::function<Return(Args...)>& the_function)  {

@@ -2,9 +2,8 @@
 // Created by crax on 10/29/21.
 //
 
-#include <object/object.h>
+#include "object/object.h"
 #include "serializers/string_serializer.h"
-#include "object/field.h"
 
 std::string object::to_string() const {
     string_serializer ser;
@@ -15,7 +14,7 @@ std::string object::to_string() const {
 void object::serialize(serializer &serializer) const  {
     serializer.begin_section(get_descriptor()->get_name());
     for (auto &field : get_descriptor()->get_fields()) {
-        serializer.add_parameter(field->get_name(), '"' + field->to_string(this) + '"');
+        serializer.add_parameter(field.first, '"' + field.second->to_string(this) + '"');
     }
     serializer.end_section(get_descriptor()->get_name());
 }

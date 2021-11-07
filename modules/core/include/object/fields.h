@@ -6,4 +6,3 @@
 
 #include "object/field.h"
 #include "object/function.h"
-#include "object/resource.h"
