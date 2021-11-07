@@ -9,6 +9,7 @@ namespace gameframework {
             CORE_REFLECT_MEMBER(m_texture)
             CORE_REFLECT_MEMBER(m_sprite_scale)
 
+
     CORE_END_DESCRIPTOR()
 }
 
