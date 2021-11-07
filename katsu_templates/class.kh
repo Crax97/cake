@@ -1,16 +1,7 @@
 namespace %NAMESPACE% {
-class %CLASSNAME%_descriptor : public descriptor{
-  public:
-  %CLASSNAME%_descriptor() : descriptor("%CLASSNAME%", nullptr) {
+    CORE_BEGIN_DESCRIPTOR(%CLASSNAME%)
 %FIELDS%
-    }
-    [[nodiscard]] const std::type_info& get_typeinfo() const override {
-        return typeid(%NAMESPACE%::%CLASSNAME%);
-    }
-};
+    CORE_END_DESCRIPTOR()
 }
 
-descriptor* %NAMESPACE%::%CLASSNAME%::get_descriptor() const {
-  static %NAMESPACE%::%CLASSNAME%_descriptor desc;
-  return &desc;
-}
+CORE_IMPLEMENT_FUNCTIONS(%NAMESPACE%::%CLASSNAME%)
