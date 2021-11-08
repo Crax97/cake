@@ -79,7 +79,7 @@ end
         REQUIRE(value == 2);
     }
     SECTION("divide_float(6, 2) == 3") {
-        // auto value = script->call<float>("call2");
-        // REQUIRE(value == 3);
+        auto value = script->call<float>("call2");
+        REQUIRE(value == 3);
     }
 }
