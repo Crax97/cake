@@ -8,25 +8,6 @@
 
 #include <iostream>
 
-class MyTestClass {
-    int x;
-    int y;
-    float z;
-
-public:
-    void say_x() const {
-        std::cout << "x is " << x << "\n";
-    }
-
-    int sum_with_y(int param) const {
-        return param + y;
-    }
-
-    void add_to_x(int off) {
-        x += off;
-    }
-};
-
 int divide(int a, int b) {
     return a / b;
 }

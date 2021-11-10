@@ -45,6 +45,10 @@ namespace luanatic {
             return script(state);
         }
 
+        lua_State* get_state() {
+            return m_state;
+        }
+
         template<typename... Args>
         void call(std::string_view function_name, Args... args) {
             internal_call(function_name, args...);
@@ -60,7 +64,11 @@ namespace luanatic {
         template<typename Return, typename... Args>
         Return call(std::string_view function_name, Args... args) {
             internal_call(function_name, args...);
-            return pop<Return>(m_state);
+            if constexpr(std::is_pointer_v<Return>) {
+                return pop_pointer<Return>(m_state);
+            } else {
+                return pop<Return>(m_state);
+            }
         }
 
         template<typename Return, typename... Args>

@@ -18,6 +18,7 @@ if(LUANATIC_BUILD_TESTS)
     add_executable(luanatic_tests
             tests/main.cpp
             tests/bindings.cpp
+            tests/object_bindings.cpp
         )
     target_link_libraries(luanatic_tests luanatic)
     target_include_directories(luanatic_tests PRIVATE ${LUANATIC_INCLUDE_DIRS})
