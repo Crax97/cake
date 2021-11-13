@@ -28,10 +28,10 @@ namespace luanatic {
             : m_state(state) { }
 
         template<typename... Args>
-        void internal_call(std::string_view function_name, Args... args) {
+        int internal_call(std::string_view function_name, Args... args) {
             lua_getglobal(m_state, function_name.data());
             int _dummy[] = {0, (push(m_state, args), 0)...};
-            lua_call(m_state, sizeof...(Args), 1);
+            return lua_pcall(m_state, sizeof...(Args), 1, 0);
         }
     public:
         static std::optional<script> compile_source(std::string_view source) {
@@ -61,8 +61,10 @@ namespace luanatic {
         }
 
         template<typename Return, typename... Args>
-        Return call(std::string_view function_name, Args... args) {
-            internal_call(function_name, args...);
+        std::optional<Return> call(std::string_view function_name, Args... args) {
+            if (internal_call(function_name, args...) != LUA_OK) {
+                return { };
+            }
             if constexpr(std::is_pointer_v<Return>) {
                 return pop_pointer<Return>(m_state);
             } else {

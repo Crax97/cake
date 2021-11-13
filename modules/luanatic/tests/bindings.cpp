@@ -31,7 +31,7 @@ end
     REQUIRE(script.has_value());
 
     SECTION("answer() == 42") {
-        int value = script->call<int>("answer");
+        auto value = script->call<int>("answer");
         REQUIRE(value == 42);
     }
     SECTION("divide(4,2) == 2") {
@@ -56,7 +56,7 @@ end
     script->bind("divide_float", &divide_float);
 
     SECTION("divide(4, 2) == 2") {
-        int value = script->call<int>("call1");
+        auto value = script->call<int>("call1");
         REQUIRE(value == 2);
     }
     SECTION("divide_float(6, 2) == 3") {

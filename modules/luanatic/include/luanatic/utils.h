@@ -6,8 +6,16 @@
 
 #include "lua.hpp"
 #include <type_traits>
+#include <typeinfo>
+#include <string>
 
 namespace luanatic {
+    template<typename Class>
+    const char* get_metatable_name() {
+        static std::string meta_name = std::string("metatable_") + std::string(typeid(Class).name());
+        return meta_name.c_str();
+    }
+
     template<typename T>
     void push(lua_State* state, const T& value);
 
