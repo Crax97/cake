@@ -9,7 +9,7 @@
 
 namespace luanatic {
     template<typename T>
-    void push(lua_State* state, T value);
+    void push(lua_State* state, const T& value);
 
     template<typename T>
     T get(lua_State* state, int index = -1);

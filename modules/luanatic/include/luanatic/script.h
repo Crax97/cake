@@ -14,8 +14,7 @@
 namespace {
     template<typename Return, typename... Args, size_t... I>
     Return call_helper(Return (*fun)(Args...), lua_State* state, std::index_sequence<I...>) {
-        std::tuple<Args...> args = {luanatic::get<Args>(state, -(sizeof...(Args) - I) )...};
-        Return r = (*fun)(luanatic::get<Args>(state, -(sizeof...(Args) - I) )...);
+        Return r = (*fun)(luanatic::get<Args>(state, -static_cast<int>(sizeof...(Args) - I) )...);
         return r;
     }
 }
