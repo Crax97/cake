@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <string>
+#include <utility>
 
 namespace luanatic {
 
@@ -42,5 +43,16 @@ namespace luanatic {
         T val = get_pointer<T>(state, -1);
         lua_pop(state, 1);
         return val;
+    }
+
+    template<typename Return, typename... Args, size_t... I>
+    int call_helper(Return (*fun)(Args...), lua_State* state, std::index_sequence<I...>) {
+        if constexpr(std::is_void_v<Return>) {
+            (*fun)(luanatic::get<Args>(state, -static_cast<int>(sizeof...(Args) - I))...);
+            return 0;
+        } else {
+            push(state, (*fun)(luanatic::get<Args>(state, -static_cast<int>(sizeof...(Args) - I))...));
+            return 1;
+        }
     }
 }

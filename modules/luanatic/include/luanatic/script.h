@@ -13,14 +13,6 @@
 #include <memory>
 #include <functional>
 
-namespace {
-    template<typename Return, typename... Args, size_t... I>
-    Return call_helper(Return (*fun)(Args...), lua_State* state, std::index_sequence<I...>) {
-        Return r = (*fun)(luanatic::get<Args>(state, -static_cast<int>(sizeof...(Args) - I) )...);
-        return r;
-    }
-}
-
 namespace luanatic {
     class script {
     struct private_tag {};
@@ -97,9 +89,7 @@ namespace luanatic {
                 int idx = -static_cast<int>(sizeof...(Args)) - 1;
 
                 auto* actual = *reinterpret_cast<function_type*>(lua_touserdata(state, idx));
-                Return r = call_helper<Return, Args...>(actual, state, std::index_sequence_for<Args...>());
-                push(state, r);
-                return 1;
+                return call_helper<Return, Args...>(actual, state, std::index_sequence_for<Args...>());
             };
             auto* lua_fun = reinterpret_cast<function_type*>(lua_newuserdata(m_state, sizeof(function_type)));
             *lua_fun = fun;

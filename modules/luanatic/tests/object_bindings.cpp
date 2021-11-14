@@ -2,6 +2,7 @@
 
 #include "luanatic/script.h"
 #include "luanatic/binder.h"
+#include "luanatic/table_builder.h"
 #include "luanatic/utils.h"
 
 class MyTestClass {
@@ -25,6 +26,29 @@ public:
         x += off;
     }
 };
+
+TEST_CASE("Testing table building") {
+    SECTION("Functions") {
+        auto summer = [](int a, float b) {
+            return static_cast<float>(a) + b;
+        };
+        auto builder = luanatic::table_builder()
+                .with_function("summer", +summer);
+        auto src = R"(
+    function test()
+        return Functions.summer(10, 20);
+    end
+)";
+
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
+        builder.inject("Functions", script->get_state());
+        auto result = script->call<float>("test");
+        REQUIRE(result.has_value());
+        REQUIRE(result.value() == 30.0f);
+    }
+}
 
 TEST_CASE("Testing object bindings", "Object")  {
     SECTION("Testing method calling") {
