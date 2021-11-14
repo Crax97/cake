@@ -49,9 +49,6 @@ TEST_CASE("Testing table building") {
         REQUIRE(result.value() == 30.0f);
     }
     SECTION("Fields") {
-        auto summer = [](int a, float b) {
-            return static_cast<float>(a) + b;
-        };
         int number = 100;
         auto builder = luanatic::table_builder()
                 .with_field("x", &number);
@@ -67,6 +64,26 @@ TEST_CASE("Testing table building") {
         auto result = script->call<float>("test");
         REQUIRE(result.has_value());
         REQUIRE(number == 30.0f);
+    }
+
+    SECTION("Read only fields") {
+        int number = 100;
+        auto builder = luanatic::table_builder()
+                .with_field("x", &number, luanatic::field_accessibility::read);
+        auto src = R"(
+    function test()
+        Functions.x = 30;
+    end
+)";
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
+        script->set_on_error_function([](lua_State* state) {
+            SUCCEED();
+        });
+        builder.inject("Functions", script->get_state());
+        auto result = script->call<float>("test");
+        REQUIRE(!result.has_value());
     }
 }
 
