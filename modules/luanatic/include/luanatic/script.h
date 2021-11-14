@@ -40,7 +40,6 @@ namespace luanatic {
                 : m_state(state) { }
         ~script() {
             if(m_state) {
-                lua_gc(m_state, LUA_GCSTEP, 1);
                 lua_close(m_state);
             }
         }
@@ -66,7 +65,6 @@ namespace luanatic {
         template<typename... Args>
         void call(std::string_view function_name, Args... args) {
             internal_call(function_name, args...);
-            lua_gc(m_state, LUA_GCSTEP, 1);
         }
 
         template<typename... Return, typename... Args>

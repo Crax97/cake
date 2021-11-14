@@ -133,7 +133,6 @@ namespace luanatic {
                 auto** address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class*)));
                 auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
                 info->is_created_in_lua = true;
-                luaL_setmetatable(state, get_metatable_name<lua_object_info>());
                 lua_setuservalue(state, -2);
                 *address = constructor_helper<Class, Args...>(state, std::index_sequence_for<Args...>{});
                 luaL_setmetatable(state, get_metatable_name<Class>());
@@ -148,7 +147,6 @@ namespace luanatic {
             auto** address = reinterpret_cast<Class**>(lua_newuserdata(m_state, sizeof(Class*)));
             *address = instance;
             auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(m_state, sizeof(lua_object_info)));
-            luaL_setmetatable(m_state, get_metatable_name<lua_object_info>());
             info->is_created_in_lua = false;
             lua_setuservalue(m_state, -2);
             luaL_setmetatable(m_state, get_metatable_name<Class>());
