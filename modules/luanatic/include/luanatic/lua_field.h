@@ -7,8 +7,8 @@
 namespace luanatic {
     struct lua_field {
         virtual void get(void *base, lua_State *state) = 0;
-
         virtual void set(void *base, lua_State *state) = 0;
+        virtual ~lua_field() = default;
     };
 
     enum class field_accessibility {
@@ -40,7 +40,6 @@ namespace luanatic {
                 (instance->*m_field) = luanatic::get<T>(state);
             }
         };
-
         return new inner_getter(field, accessibility);
     }
 

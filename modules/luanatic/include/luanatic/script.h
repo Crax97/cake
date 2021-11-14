@@ -10,6 +10,7 @@
 #include <string_view>
 #include <optional>
 #include <tuple>
+#include <functional>
 
 namespace {
     template<typename Return, typename... Args, size_t... I>
@@ -26,7 +27,8 @@ namespace luanatic {
     private:
         explicit script(lua_State* state)
             : m_state(state) { }
-
+        std::function<void(lua_State*)> m_on_error_function;
+        void log_error() const;
         template<typename... Args>
         int internal_call(std::string_view function_name, Args... args) {
             lua_getglobal(m_state, function_name.data());
@@ -42,6 +44,10 @@ namespace luanatic {
                 return {};
             }
             return script(state);
+        }
+
+        void set_on_error_function(const std::function<void(lua_State*)>& function) {
+            m_on_error_function = function;
         }
 
         lua_State* get_state() {
@@ -63,6 +69,10 @@ namespace luanatic {
         template<typename Return, typename... Args>
         std::optional<Return> call(std::string_view function_name, Args... args) {
             if (internal_call(function_name, args...) != LUA_OK) {
+                log_error();
+                if(m_on_error_function) {
+                    m_on_error_function(m_state);
+                }
                 return { };
             }
             if constexpr(std::is_pointer_v<Return>) {

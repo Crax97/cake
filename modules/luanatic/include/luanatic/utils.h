@@ -10,6 +10,9 @@
 #include <string>
 
 namespace luanatic {
+
+    void print_stack(lua_State* state);
+
     template<typename Class>
     const char* get_metatable_name() {
         static std::string meta_name = std::string("metatable_") + std::string(typeid(Class).name());

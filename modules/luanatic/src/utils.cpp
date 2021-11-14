@@ -3,10 +3,38 @@
 //
 
 #include "luanatic/utils.h"
+#include "logging/logger.h"
 
 #include <string>
 
+logging::category log_luanatic("luanatic");
 namespace luanatic {
+
+    void print_stack(lua_State* state) {
+        int top = lua_gettop(state);
+        for(int i = 1; i <= top;  i++) {
+            auto msg = log_luanatic();
+            msg << i << ": " << lua_typename(state, i) << " ";
+            switch (lua_type(state, i)) {
+                case LUA_TNUMBER:
+                    msg << lua_tonumber(state,i);
+                    break;
+                case LUA_TSTRING:
+                    msg << lua_tostring(state,i);
+                    break;
+                case LUA_TBOOLEAN:
+                    msg << (lua_toboolean(state, i) ? "true" : "false");
+                    break;
+                case LUA_TNIL:
+                    msg << "nil";
+                    break;
+                default:
+                    msg << lua_topointer(state,i);
+                    break;
+            }
+        }
+    }
+
     template<>
     void push<int>(lua_State *state, const int& value) {
         lua_pushinteger(state, value);

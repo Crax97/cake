@@ -40,10 +40,10 @@ TEST_CASE("Testing object bindings", "Object")  {
                 .with_constructor<float, int>()
                 .with_method("add_to_x", &MyTestClass::add_to_x);
         REQUIRE(script.has_value());
-        auto call_result = script->call<MyTestClass*>("test");
+        auto call_result = script->call<MyTestClass**>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result != nullptr);
-        REQUIRE(call_result.value()->x == 27);
+        REQUIRE((*call_result.value())->x == 27);
     }
     SECTION("Testing const method calling + return") {
         auto src = R"(
@@ -62,6 +62,24 @@ TEST_CASE("Testing object bindings", "Object")  {
         REQUIRE(call_result.value() == 28);
     }
 
+    SECTION("Testing accessing non existent field") {
+        auto src = R"(
+    function test()
+        obj = MyTestClass(10.0,  12)
+        return obj.booba
+    end
+)";
+        auto script = luanatic::script::compile_source(src);
+        script->set_on_error_function(+[](lua_State* state) {
+            SUCCEED();
+        });
+        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
+                .with_constructor<float, int>()
+                .with_method("sum_with_x", &MyTestClass::sum_with_x);
+        REQUIRE(script.has_value());
+        auto call_result = script->call<int>("test");
+    }
+#if 0
     SECTION("Additional getter/setter") {
         auto src = R"(
     function test()
@@ -89,6 +107,7 @@ TEST_CASE("Testing object bindings", "Object")  {
         REQUIRE(number == 84);
 
     }
+#endif
 
     SECTION("Everything together") {
         auto src = R"(
@@ -104,6 +123,7 @@ TEST_CASE("Testing object bindings", "Object")  {
     end
 )";
         auto script = luanatic::script::compile_source(src);
+        script->set_on_error_function(&luanatic::print_stack);
         auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
                 .with_constructor<float, int>()
                 .with_method("add_to_x", &MyTestClass::add_to_x)
@@ -115,10 +135,10 @@ TEST_CASE("Testing object bindings", "Object")  {
                 })
                 .with_property("z", &MyTestClass::z);
         REQUIRE(script.has_value());
-        auto call_result = script->call<MyTestClass *>("test");
+        auto call_result = script->call<MyTestClass **>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result != nullptr);
-        REQUIRE(call_result.value()->z == 166.0f);
-        REQUIRE(call_result.value()->x == 35);
+        REQUIRE((*call_result.value())->z == 166.0f);
+        REQUIRE((*call_result.value())->x == 35);
     }
 }
