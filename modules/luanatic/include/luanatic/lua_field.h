@@ -42,5 +42,27 @@ namespace luanatic {
         };
         return new inner_getter(field, accessibility);
     }
-
+    template<typename T>
+    lua_field* make_field(T* field, field_accessibility accessibility) {
+        struct inner_getter : public lua_field {
+            using field_type = T*;
+            field_type m_field;
+            field_accessibility m_accessibility = field_accessibility::read_and_write;
+            inner_getter(field_type ffield, field_accessibility aaccessibility)
+                    : m_field(ffield), m_accessibility(aaccessibility) { }
+            void get(void* base, lua_State* state) override {
+                if(!(static_cast<int>(m_accessibility) & static_cast<int>(field_accessibility::read))) {
+                    luaL_error(state, "Tried to access a field which is not readable");
+                }
+                push<T>(state, *m_field);
+            }
+            void set(void* base, lua_State* state) override {
+                if(!(static_cast<int>(m_accessibility) & static_cast<int>(field_accessibility::write))) {
+                    luaL_error(state, "Tried to write a field which is not writable");
+                }
+                (*m_field) = luanatic::get<T>(state);
+            }
+        };
+        return new inner_getter(field, accessibility);
+    }
 }

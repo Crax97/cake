@@ -48,6 +48,26 @@ TEST_CASE("Testing table building") {
         REQUIRE(result.has_value());
         REQUIRE(result.value() == 30.0f);
     }
+    SECTION("Fields") {
+        auto summer = [](int a, float b) {
+            return static_cast<float>(a) + b;
+        };
+        int number = 100;
+        auto builder = luanatic::table_builder()
+                .with_field("x", &number);
+        auto src = R"(
+    function test()
+        Functions.x = 30;
+    end
+)";
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
+        builder.inject("Functions", script->get_state());
+        auto result = script->call<float>("test");
+        REQUIRE(result.has_value());
+        REQUIRE(number == 30.0f);
+    }
 }
 
 TEST_CASE("Testing object bindings", "Object")  {
