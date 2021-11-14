@@ -35,11 +35,12 @@ TEST_CASE("Testing object bindings", "Object")  {
         return obj
     end
 )";
-        auto script = luanatic::script::compile_source(src);
-        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
+        auto compiled_script = luanatic::script::compile_source(src);
+        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", compiled_script.value()->get_state())
                 .with_constructor<float, int>()
                 .with_method("add_to_x", &MyTestClass::add_to_x);
-        REQUIRE(script.has_value());
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
         auto call_result = script->call<MyTestClass**>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result != nullptr);
@@ -52,11 +53,12 @@ TEST_CASE("Testing object bindings", "Object")  {
         return obj:sum_with_x(16)
     end
 )";
-        auto script = luanatic::script::compile_source(src);
-        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
+        auto compiled_script = luanatic::script::compile_source(src);
+        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", compiled_script.value()->get_state())
                 .with_constructor<float, int>()
                 .with_method("sum_with_x", &MyTestClass::sum_with_x);
-        REQUIRE(script.has_value());
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
         auto call_result = script->call<int>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result.value() == 28);
@@ -69,17 +71,17 @@ TEST_CASE("Testing object bindings", "Object")  {
         return obj.booba
     end
 )";
-        auto script = luanatic::script::compile_source(src);
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
         script->set_on_error_function(+[](lua_State* state) {
             SUCCEED();
         });
         auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
                 .with_constructor<float, int>()
                 .with_method("sum_with_x", &MyTestClass::sum_with_x);
-        REQUIRE(script.has_value());
         auto call_result = script->call<int>("test");
     }
-#if 0
     SECTION("Additional getter/setter") {
         auto src = R"(
     function test()
@@ -89,25 +91,29 @@ TEST_CASE("Testing object bindings", "Object")  {
     end
     )";
         int number;
-        auto script = luanatic::script::compile_source(src);
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
         MyTestClass instance {};
         auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
                 .with_constructor<float, int>()
                 .with_method("sum_with_x", &MyTestClass::sum_with_x)
-                .with_custom_getter([](lua_State* state, std::string_view what) {
-                    return 0;
+                .with_custom_getter(+[](lua_State* state, std::string_view what) {
+                    luanatic::push(state, what);
+                    return 1;
                 })
                 .with_custom_setter([&number](lua_State* state, std::string_view what){
+                    if(what == "param_to_custom_indexer") {
+                        number = luanatic::get<int>(state);
+                    }
                     return 0;
-                });
-        REQUIRE(script.has_value());
-        auto call_result = script->call<int>("test");
+                })
+                .bind("obj", &instance);
+        auto call_result = script->call<std::string>("test");
         REQUIRE(call_result.has_value());
-        REQUIRE(call_result.value() == 42);
+        REQUIRE(call_result.value() == "param_from_custom_indexer");
         REQUIRE(number == 84);
-
     }
-#endif
 
     SECTION("Everything together") {
         auto src = R"(
@@ -122,7 +128,9 @@ TEST_CASE("Testing object bindings", "Object")  {
         return obj
     end
 )";
-        auto script = luanatic::script::compile_source(src);
+        auto compiled_script = luanatic::script::compile_source(src);
+        REQUIRE(compiled_script.has_value());
+        auto& script = compiled_script.value();
         script->set_on_error_function(&luanatic::print_stack);
         auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
                 .with_constructor<float, int>()
@@ -134,7 +142,6 @@ TEST_CASE("Testing object bindings", "Object")  {
                     return 0;
                 })
                 .with_property("z", &MyTestClass::z);
-        REQUIRE(script.has_value());
         auto call_result = script->call<MyTestClass **>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result != nullptr);

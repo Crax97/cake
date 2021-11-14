@@ -27,8 +27,9 @@ function divide(a, b)
 end
 )";
 
-    auto script = luanatic::script::compile_source(source);
-    REQUIRE(script.has_value());
+    auto compiled_script = luanatic::script::compile_source(source);
+    REQUIRE(compiled_script.has_value());
+    auto& script = compiled_script.value();
 
     SECTION("answer() == 42") {
         auto value = script->call<int>("answer");
@@ -50,8 +51,9 @@ function call2(a, b)
 end
 )";
 
-    auto script = luanatic::script::compile_source(source);
-    REQUIRE(script.has_value());
+    auto compiled_script = luanatic::script::compile_source(source);
+    REQUIRE(compiled_script.has_value());
+    auto& script = compiled_script.value();
     script->bind("divide", &divide);
     script->bind("divide_float", &divide_float);
 

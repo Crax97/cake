@@ -10,6 +10,7 @@
 #include <string_view>
 #include <optional>
 #include <tuple>
+#include <memory>
 #include <functional>
 
 namespace {
@@ -22,11 +23,9 @@ namespace {
 
 namespace luanatic {
     class script {
-
+    struct private_tag {};
         lua_State* m_state;
     private:
-        explicit script(lua_State* state)
-            : m_state(state) { }
         std::function<void(lua_State*)> m_on_error_function;
         void log_error() const;
         template<typename... Args>
@@ -36,14 +35,24 @@ namespace luanatic {
             return lua_pcall(m_state, sizeof...(Args), 1, 0);
         }
     public:
-        static std::optional<script> compile_source(std::string_view source) {
+
+        explicit script(lua_State* state, private_tag)
+                : m_state(state) { }
+        ~script() {
+            if(m_state) {
+                lua_gc(m_state, LUA_GCSTEP, 1);
+                lua_close(m_state);
+            }
+        }
+
+        static std::optional<std::unique_ptr<script>> compile_source(std::string_view source) {
             lua_State* state = luaL_newstate();
             int result = luaL_dostring(state, source.data());
             if(result != LUA_OK) {
                 lua_close(state);
                 return {};
             }
-            return script(state);
+            return std::make_unique<script>(state, private_tag{});
         }
 
         void set_on_error_function(const std::function<void(lua_State*)>& function) {
@@ -57,6 +66,7 @@ namespace luanatic {
         template<typename... Args>
         void call(std::string_view function_name, Args... args) {
             internal_call(function_name, args...);
+            lua_gc(m_state, LUA_GCSTEP, 1);
         }
 
         template<typename... Return, typename... Args>

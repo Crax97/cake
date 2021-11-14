@@ -46,7 +46,15 @@ namespace luanatic {
             return new Class(luanatic::get<Args>(state, -(arg_size - I + 1))...);
         }
 
+        constexpr int LUA_ISGC_INDEX = -1;
     }
+
+    struct lua_object_info {
+        bool is_created_in_lua;
+        bool was_destroyed = false;
+    };
+    using indexing_function = std::function<int(lua_State*, std::string_view)>;
+
     template<typename Class>
     class binder {
         const std::string m_name{};
@@ -59,6 +67,11 @@ namespace luanatic {
             auto index = [](lua_State* state){
                 auto field_name = get<std::string>(state);
                 if(luaL_getmetafield(state, -2, field_name.c_str()) == 0) {
+                    if(luaL_getmetafield(state, -2, "custom_getter")) {
+                        auto* custom_getter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
+                        lua_pop(state, 1);
+                        return (*custom_getter)(state, field_name);
+                    }
                     luaL_error(state, "could not get field %s on %s", field_name.c_str(), get_metatable_name<Class>());
                     return 0;
                 }
@@ -70,10 +83,14 @@ namespace luanatic {
                 }
                 return 1;
             };
-
             auto newindex = [](lua_State* state) {
                 auto field_name = get<std::string>(state, -2);
                 if(luaL_getmetafield(state, -3, field_name.c_str()) == 0) {
+                    if(luaL_getmetafield(state, -3, "custom_setter")) {
+                        auto* custom_setter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
+                        lua_pop(state, 1);
+                        return (*custom_setter)(state, field_name);
+                    }
                     luaL_error(state, "could not set field %s on %s", field_name.c_str(), lua_tostring(state, -3));
                     return 0;
                 }
@@ -87,9 +104,18 @@ namespace luanatic {
 
             };
             auto gc = [](lua_State* state) {
-                Class* instance = *reinterpret_cast<Class**>(luaL_checkudata(state, -1, get_metatable_name<Class>()));
-                instance->~Class();
-                delete instance;
+                lua_getuservalue(state, -1);
+                auto info = *reinterpret_cast<lua_object_info*>(lua_touserdata(state, -1));
+                lua_pop(state, 1);
+
+                if(info.is_created_in_lua && !info.was_destroyed) {
+                    // delete only if this object was created from lua code
+                    Class *instance = *reinterpret_cast<Class **>(luaL_checkudata(state, -1,
+                                                                                  get_metatable_name<Class>()));
+                    instance->~Class();
+                    delete instance;
+                    info.was_destroyed = true;
+                }
                 return 0;
             };
             push(state, +index);
@@ -105,12 +131,28 @@ namespace luanatic {
         binder& with_constructor() {
             auto constructor = [](lua_State* state) {
                 auto** address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class*)));
+                auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
+                info->is_created_in_lua = true;
+                luaL_setmetatable(state, get_metatable_name<lua_object_info>());
+                lua_setuservalue(state, -2);
                 *address = constructor_helper<Class, Args...>(state, std::index_sequence_for<Args...>{});
                 luaL_setmetatable(state, get_metatable_name<Class>());
                 return 1;
             };
             push(m_state, +constructor);
             lua_setglobal(m_state, m_name.c_str());
+            return *this;
+        }
+
+        binder& bind(std::string_view obj_name, Class* instance) {
+            auto** address = reinterpret_cast<Class**>(lua_newuserdata(m_state, sizeof(Class*)));
+            *address = instance;
+            auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(m_state, sizeof(lua_object_info)));
+            luaL_setmetatable(m_state, get_metatable_name<lua_object_info>());
+            info->is_created_in_lua = false;
+            lua_setuservalue(m_state, -2);
+            luaL_setmetatable(m_state, get_metatable_name<Class>());
+            lua_setglobal(m_state, obj_name.data());
             return *this;
         }
 
@@ -168,16 +210,25 @@ namespace luanatic {
             lua_pop(m_state, 1); // Remove the metatable
             return *this;
         }
-        binder& with_custom_getter(const std::function<int(lua_State*, std::string_view)>& getter) {
+        binder& with_custom_getter(const indexing_function& getter) {
+            lua_getglobal(m_state, get_metatable_name<Class>());
+            auto** fn_storage = reinterpret_cast<const indexing_function**>(lua_newuserdata(m_state, sizeof(indexing_function*)));
+            *fn_storage = &getter;
+            lua_setfield(m_state, -2, "custom_getter");
+            lua_pop(m_state, 1);
             return *this;
         }
-        binder& with_custom_setter(const std::function<int(lua_State*, std::string_view)>& setter) {
+        binder& with_custom_setter(const indexing_function& setter) {
+            lua_getglobal(m_state, get_metatable_name<Class>());
+            auto** fn_storage = reinterpret_cast<const indexing_function**>(lua_newuserdata(m_state, sizeof(indexing_function*)));
+            *fn_storage = &setter;
+            lua_setfield(m_state, -2, "custom_setter");
+            lua_pop(m_state, 1);
             return *this;
         }
         template<typename PropType>
         binder& with_property(const std::string& property_name, PropType Class::*prop, field_accessibility accessibility = field_accessibility::read_and_write) {
             using prop_signature = PropType Class::*;
-
             lua_getglobal(m_state, get_metatable_name<Class>());
 
             auto* getter_storage = reinterpret_cast<lua_field**>(lua_newuserdata(m_state, sizeof(lua_field*)));
