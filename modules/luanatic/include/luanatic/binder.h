@@ -45,8 +45,10 @@ namespace luanatic {
             std::tuple<Args...> debug = {luanatic::get<Args>(state, -(arg_size - I + 1))...};
             return new Class(luanatic::get<Args>(state, -(arg_size - I + 1))...);
         }
-
-        constexpr int LUA_ISGC_INDEX = -1;
+        lua_field* to_lua_field(lua_State* state, int field_index = -1) {
+            auto* field = luaL_testudata(state, field_index, get_metatable_name<lua_field>());
+            return field ? *reinterpret_cast<lua_field**>(field) : nullptr;
+        };
     }
 
     struct lua_object_info {
@@ -55,6 +57,24 @@ namespace luanatic {
     };
     using indexing_function = std::function<int(lua_State*, std::string_view)>;
 
+    int try_call_custom_setter(lua_State* state, std::string_view field_name) {
+        if(luaL_getmetafield(state, 1, "custom_setter")) {
+            auto* custom_setter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
+            lua_pop(state, 1);
+            return (*custom_setter)(state, field_name);
+        }
+        luaL_error(state, "could not set field %s on %s", field_name.data(), lua_tostring(state, 1));
+        return 0;
+    };
+    int try_call_custom_getter(lua_State* state, std::string_view field_name) {
+        if(luaL_getmetafield(state, 1, "custom_getter")) {
+            auto* custom_getter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
+            lua_pop(state, 1);
+            return (*custom_getter)(state, field_name);
+        }
+        luaL_error(state, "could not get field %s on %s", field_name.data(), lua_tostring(state, 1));
+        return 0;
+    };
     template<typename Class>
     class binder {
         const std::string m_name{};
@@ -66,38 +86,26 @@ namespace luanatic {
             luaL_newmetatable(m_state, get_metatable_name<Class>());
             auto index = [](lua_State* state){
                 auto field_name = get<std::string>(state);
-                if(luaL_getmetafield(state, -2, field_name.c_str()) == 0) {
-                    if(luaL_getmetafield(state, -2, "custom_getter")) {
-                        auto* custom_getter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
-                        lua_pop(state, 1);
-                        return (*custom_getter)(state, field_name);
-                    }
-                    luaL_error(state, "could not get field %s on %s", field_name.c_str(), get_metatable_name<Class>());
-                    return 0;
+                bool has_field = luaL_getmetafield(state, 1, field_name.c_str()) != 0;
+                if(!has_field) {
+                    try_call_custom_setter(state, field_name);
                 }
-                if(void* field_ptr = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
-                    auto* field = *reinterpret_cast<lua_field**>(field_ptr);
-                    lua_pop(state, 1);
-                    auto* instance = *reinterpret_cast<Class**>(luaL_checkudata(state, -2, get_metatable_name<Class>()));
+                if(auto* field = to_lua_field(state)) {
+                    lua_pop(state, 1); // pop the lua_field
+                    auto* instance = get_self<Class>(state);
                     field->get(instance, state);
                 }
                 return 1;
             };
             auto newindex = [](lua_State* state) {
                 auto field_name = get<std::string>(state, -2);
-                if(luaL_getmetafield(state, -3, field_name.c_str()) == 0) {
-                    if(luaL_getmetafield(state, -3, "custom_setter")) {
-                        auto* custom_setter = *reinterpret_cast<const indexing_function**>(lua_touserdata(state, -1));
-                        lua_pop(state, 1);
-                        return (*custom_setter)(state, field_name);
-                    }
-                    luaL_error(state, "could not set field %s on %s", field_name.c_str(), lua_tostring(state, -3));
-                    return 0;
+                bool has_field = luaL_getmetafield(state, 1, field_name.c_str()) != 0;
+                if(!has_field) {
+                    return try_call_custom_setter(state, field_name);
                 }
-                if(void* field_ptr = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
-                    auto* field = *reinterpret_cast<lua_field**>(field_ptr);
-                    lua_pop(state, 1);
-                    auto* instance = *reinterpret_cast<Class**>(luaL_checkudata(state, -3, get_metatable_name<Class>()));
+                if(auto* field = to_lua_field(state)) {
+                    lua_pop(state, 1); // pop the lua_field
+                    auto* instance = get_self<Class>(state);
                     field->set(instance, state);
                 }
                 return 0;

@@ -55,4 +55,12 @@ namespace luanatic {
             return 1;
         }
     }
+
+    // this tests the metatable as well, so make sure you set the appropriate metatable on the userdata
+    template<typename Class>
+    Class* get_self(lua_State* state) {
+        // lmao rtfm next time
+        constexpr int LUA_SELF_INDEX = 1;
+        return *reinterpret_cast<Class**>(luaL_testudata(state, LUA_SELF_INDEX, get_metatable_name<Class>()));
+    }
 }
