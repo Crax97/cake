@@ -75,31 +75,7 @@ namespace luanatic {
                 }
                 return { };
             }
-            if constexpr(std::is_pointer_v<Return>) {
-                return pop_pointer<Return>(m_state);
-            } else {
-                return pop<Return>(m_state);
-            }
-        }
-
-        template<typename Return, typename... Args>
-        void bind(std::string_view name, Return (*fun)(Args...)) {
-            using function_type = Return(*)(Args...);
-            auto caller = [](lua_State* state) {
-                int idx = -static_cast<int>(sizeof...(Args)) - 1;
-
-                auto* actual = *reinterpret_cast<function_type*>(lua_touserdata(state, idx));
-                return call_helper<Return, Args...>(actual, state, std::index_sequence_for<Args...>());
-            };
-            auto* lua_fun = reinterpret_cast<function_type*>(lua_newuserdata(m_state, sizeof(function_type)));
-            *lua_fun = fun;
-
-            lua_newtable(m_state);
-            push(m_state, static_cast<lua_CFunction>(caller));
-            lua_setfield(m_state, -2, "__call");
-            lua_setmetatable(m_state, -2);
-
-            lua_setglobal(m_state, name.data());
+            return pop<Return>(m_state);
         }
     };
 }

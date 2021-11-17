@@ -33,9 +33,15 @@ namespace luanatic {
 
     template<typename T>
     T pop(lua_State* state) {
-        T val = get<T>(state, -1);
-        lua_pop(state, 1);
-        return val;
+        if constexpr(std::is_pointer_v<T>) {
+            T val = get_pointer<T>(state, -1);
+            lua_pop(state, 1);
+            return val;
+        } else {
+            T val = get<T>(state, -1);
+            lua_pop(state, 1);
+            return val;
+        }
     }
 
     template<typename T>
@@ -43,6 +49,11 @@ namespace luanatic {
         T val = get_pointer<T>(state, -1);
         lua_pop(state, 1);
         return val;
+    }
+    template<typename T>
+    inline void push_pointer(lua_State* state, T val) {
+        T* ptr = reinterpret_cast<T*>(lua_newuserdata(state, sizeof(T)));
+        *ptr = val;
     }
 
     template<typename Return, typename... Args, size_t... I>
@@ -56,6 +67,38 @@ namespace luanatic {
         }
     }
 
+    template<typename T>
+    void bind(lua_State* state, std::string_view name, T value) {
+        if constexpr (std::is_pointer_v<T>) {
+            push_pointer(state, value);
+        } else {
+            push(value);
+        }
+        lua_setglobal(state, name.data());
+    }
+
+    template<typename Return, typename... Args>
+    void bind(lua_State* state, std::string_view name, Return (*fun)(Args...)) {
+        using sig = Return (*)(Args...);
+        sig* ptr = reinterpret_cast<sig*>(lua_newuserdata(state, sizeof(sig*)));
+        *ptr = fun;
+
+        auto caller = [](lua_State* state) {
+            sig fn = *reinterpret_cast<sig*>(lua_touserdata(state, 1));
+            return call_helper<Return, Args...>(fn, state, std::index_sequence_for<Args...>{});
+        };
+
+        lua_newtable(state);
+        push(state, +caller);
+        lua_setfield(state, -2, "__call");
+        lua_setmetatable(state, -2);
+        lua_setglobal(state, name.data());
+    }
+    inline void bind(lua_State* state, std::string_view name, lua_CFunction fun) {
+        lua_pushcfunction(state, fun);
+        lua_setglobal(state, name.data());
+    }
+
     // this tests the metatable as well, so make sure you set the appropriate metatable on the userdata
     template<typename Class>
     Class* get_self(lua_State* state) {
@@ -63,4 +106,5 @@ namespace luanatic {
         constexpr int LUA_SELF_INDEX = 1;
         return *reinterpret_cast<Class**>(luaL_testudata(state, LUA_SELF_INDEX, get_metatable_name<Class>()));
     }
+
 }

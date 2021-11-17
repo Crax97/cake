@@ -54,8 +54,8 @@ end
     auto compiled_script = luanatic::script::compile_source(source);
     REQUIRE(compiled_script.has_value());
     auto& script = compiled_script.value();
-    script->bind("divide", &divide);
-    script->bind("divide_float", &divide_float);
+    luanatic::bind(script->get_state(), "divide", &divide);
+    luanatic::bind(script->get_state(), "divide_float", &divide_float);
 
     SECTION("divide(4, 2) == 2") {
         auto value = script->call<int>("call1");

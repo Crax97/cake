@@ -1,15 +1,16 @@
 //
-// Created by crax on 11/9/21.
+// Created by crax on 11/14/21.
 //
 
 #pragma once
 
-#include <type_traits>
-#include <typeinfo>
-#include <utility>
-
-#include "utils.h"
 #include "lua_field.h"
+#include "utils.h"
+#include "injector.h"
+
+#include <memory>
+#include <unordered_map>
+#include <string>
 
 namespace luanatic {
     namespace {
@@ -42,7 +43,6 @@ namespace luanatic {
         template<typename Class, typename... Args, std::size_t... I>
         Class* constructor_helper(lua_State *state, std::index_sequence<I...>) {
             int arg_size = static_cast<int>(sizeof...(Args));
-            std::tuple<Args...> debug = {luanatic::get<Args>(state, -(arg_size - I + 1))...};
             return new Class(luanatic::get<Args>(state, -(arg_size - I + 1))...);
         }
         lua_field* to_lua_field(lua_State* state, int field_index = -1) {
@@ -52,7 +52,7 @@ namespace luanatic {
     }
 
     struct lua_object_info {
-        bool is_created_in_lua;
+        bool is_created_in_lua{};
         bool was_destroyed = false;
     };
     using indexing_function = std::function<int(lua_State*, std::string_view)>;
@@ -75,184 +75,232 @@ namespace luanatic {
         luaL_error(state, "could not get field %s on %s", field_name.data(), lua_tostring(state, 1));
         return 0;
     };
-    template<typename Class>
-    class binder {
-        const std::string m_name{};
 
-        lua_State* m_state;
-    public:
-        explicit binder(std::string name, lua_State* state)
-            : m_name(std::move(name)), m_state(state) {
-            luaL_newmetatable(m_state, get_metatable_name<Class>());
-            auto index = [](lua_State* state){
-                auto field_name = get<std::string>(state);
-                bool has_field = luaL_getmetafield(state, 1, field_name.c_str()) != 0;
-                if(!has_field) {
-                    try_call_custom_setter(state, field_name);
-                }
-                if(auto* field = to_lua_field(state)) {
-                    lua_pop(state, 1); // pop the lua_field
+    template<typename Class, typename... Args>
+    int constructor(lua_State* state) {
+        auto** instance_address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class**)));
+        *instance_address = constructor_helper<Class, Args...>(state, std::index_sequence_for<Args...>{});
+
+        // 1. Bind correct metatable
+        luaL_newmetatable(state, get_metatable_name<Class>());
+        lua_setmetatable(state, -2);
+
+        // 2. Configure data for garbage collector
+        auto* instance_info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
+        instance_info->is_created_in_lua = true;
+        lua_setuservalue(state, -2);
+
+
+        return 1;
+    }
+
+    template<typename Class, typename Return, typename... Args>
+    std::unique_ptr <injector> make_method_injector(Return (Class::*function)(Args...)) {
+        using fn_sig = Return(Class::*)(Args...);
+        class inner_injector : public injector {
+        private:
+            fn_sig m_method;
+
+        public:
+            explicit inner_injector(fn_sig method) : m_method(method) {}
+
+            void inject(lua_State *state) override {
+                auto caller = [](lua_State *state) {
                     auto* instance = get_self<Class>(state);
+                    fn_sig function = *reinterpret_cast<fn_sig *>(lua_touserdata(state, 1));
+                    return do_call( state, instance, function, std::index_sequence_for < Args... > {});
+                };
+                auto *address = reinterpret_cast<fn_sig *>(lua_newuserdata(state, sizeof(fn_sig)));
+                *address = m_method;
+                lua_newtable(state);
+                lua_pushcfunction(state, +caller);
+                lua_setfield(state, -2, "__call");
+                lua_setmetatable(state, -2);
+            }
+        };
+        return std::make_unique<inner_injector>(function);
+    }
+
+    template<typename Class, typename Return, typename... Args>
+    std::unique_ptr <injector> make_method_injector(Return (Class::*function)(Args...) const) {
+        using fn_sig = Return(Class::*)(Args...) const;
+        class inner_injector : public injector {
+        private:
+            fn_sig m_method;
+
+        public:
+            explicit inner_injector(fn_sig method) : m_method(method) {}
+
+            void inject(lua_State *state) override {
+                auto caller = [](lua_State *state) {
+                    auto* instance = get_self<Class>(state);
+                    fn_sig function = *reinterpret_cast<fn_sig *>(lua_touserdata(state, 1));
+                    return do_call( state, instance, function, std::index_sequence_for < Args... > {});
+                };
+                auto *address = reinterpret_cast<fn_sig *>(lua_newuserdata(state, sizeof(fn_sig)));
+                *address = m_method;
+                lua_newtable(state);
+                lua_pushcfunction(state, +caller);
+                lua_setfield(state, -2, "__call");
+                lua_setmetatable(state, -2);
+            }
+        };
+        return std::make_unique<inner_injector>(function);
+    }
+
+    template<typename T, typename Class>
+    std::unique_ptr <injector> make_class_field_injector(T Class::*field, field_accessibility accessibility) {
+        class inner_injector : public injector {
+        private:
+            T Class::*m_field;
+            field_accessibility m_acc;
+        public:
+            explicit inner_injector(T Class::*f, field_accessibility a) : m_field(f), m_acc(a) {}
+
+            void inject(lua_State *state) override {
+                auto **field = reinterpret_cast<lua_field **>(lua_newuserdata(state, sizeof(lua_field * )));
+                *field = make_field_for_class(m_field, m_acc);
+
+                lua_newtable(state);
+                auto gc = [](lua_State *state) {
+                    auto **field = reinterpret_cast<lua_field **>(lua_touserdata(state, -1));
+                    delete *field;
+                    return 0;
+                };
+                push(state, +gc);
+                lua_setfield(state, -2, "__gc");
+                lua_setmetatable(state, -2);
+            }
+        };
+        return std::make_unique<inner_injector>(field, accessibility);
+    }
+
+    template<typename Class>
+    class class_builder {
+    private:
+        std::unordered_map<std::string, std::unique_ptr<injector>> m_function_injectors {};
+        std::unordered_map<std::string, std::unique_ptr<injector>> m_field_injectors {};
+
+    public:
+        class_builder() = default;
+
+        template<typename Return, typename... Args>
+        class_builder&& with_function(const std::string& function_name, Return (*function)(Args...)) {
+            std::unique_ptr<injector> injector = make_injector(function);
+            m_function_injectors.insert({function_name, std::move(injector)});
+            return std::move(*this);
+        }
+
+        template<typename Return, typename... Args>
+        class_builder&& with_method(const std::string& function_name, Return (Class::*function)(Args...)) {
+            std::unique_ptr<injector> injector = make_method_injector(function);
+            m_function_injectors.insert({function_name, std::move(injector)});
+            return std::move(*this);
+        }
+
+        template<typename Return, typename... Args>
+        class_builder&& with_method(const std::string& function_name, Return (Class::*function)(Args...) const) {
+            std::unique_ptr<injector> injector = make_method_injector(function);
+            m_function_injectors.insert({function_name, std::move(injector)});
+            return std::move(*this);
+        }
+
+        template<typename Type>
+        class_builder&& with_field(const std::string& field_name, Type* field_ptr, field_accessibility accessibility = field_accessibility::read_and_write) {
+            std::unique_ptr<injector> injector = make_field_injector(field_ptr, accessibility);
+            m_field_injectors.insert({field_name, std::move(injector)});
+            return std::move(*this);
+        }
+
+        template<typename Type>
+        class_builder&& with_class_field(const std::string& field_name,Type Class::* field_ptr, field_accessibility accessibility = field_accessibility::read_and_write) {
+            std::unique_ptr<injector> injector = make_class_field_injector(field_ptr, accessibility);
+            m_field_injectors.insert({field_name, std::move(injector)});
+            return std::move(*this);
+        }
+
+        void inject(lua_State* state) {
+            auto field_get = [](lua_State* state) {
+                auto* instance = get_self<Class>(state);
+                auto field_name = get<std::string>(state, 2);
+                lua_getmetatable(state, 1);
+                if(lua_getfield(state, -1, field_name.c_str()) == 0) {
+                    lua_pop(state, 1);
+                    lua_pushnil(state);
+                    return 1;
+                }
+                if(void* data = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
+                    lua_field* field = *reinterpret_cast<lua_field**>(data);
+                    lua_pop(state, 1);
                     field->get(instance, state);
                 }
+                lua_pop(state, 1);
                 return 1;
             };
-            auto newindex = [](lua_State* state) {
-                auto field_name = get<std::string>(state, -2);
-                bool has_field = luaL_getmetafield(state, 1, field_name.c_str()) != 0;
-                if(!has_field) {
-                    return try_call_custom_setter(state, field_name);
-                }
-                if(auto* field = to_lua_field(state)) {
-                    lua_pop(state, 1); // pop the lua_field
-                    auto* instance = get_self<Class>(state);
-                    field->set(instance, state);
+
+            auto field_set = [](lua_State* state) {
+                auto* instance = get_self<Class>(state);
+                auto field_name = get<std::string>(state, 2);
+                lua_getmetatable(state, 1);
+                if(lua_getfield(state, -1, field_name.c_str()) != 0) {
+                    if (void *data = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
+                        lua_field *field = *reinterpret_cast<lua_field **>(data);
+                        lua_pop(state, 2);
+                        field->set(instance, state);
+                    }
+                } else {
+                    lua_pop(state, 1);
+                    lua_rawset(state, -3);
                 }
                 return 0;
-
             };
-            auto gc = [](lua_State* state) {
-                lua_getuservalue(state, -1);
-                auto info = *reinterpret_cast<lua_object_info*>(lua_touserdata(state, -1));
-                lua_pop(state, 1);
 
-                if(info.is_created_in_lua && !info.was_destroyed) {
-                    // delete only if this object was created from lua code
-                    Class *instance = *reinterpret_cast<Class **>(luaL_checkudata(state, -1,
-                                                                                  get_metatable_name<Class>()));
+            auto gc = [](lua_State* state) {
+                auto* instance = get_self<Class>(state);
+                lua_getuservalue(state, 1);
+                auto* info = reinterpret_cast<lua_object_info*>(lua_touserdata(state, -1));
+                lua_pop(state, 1);
+                if(info->is_created_in_lua && !info->was_destroyed) {
                     instance->~Class();
                     delete instance;
-                    info.was_destroyed = true;
+                    info->was_destroyed = true;
                 }
                 return 0;
             };
-            push(state, +index);
+            luaL_newmetatable(state, get_metatable_name<Class>());
+            push(state, +field_get);
             lua_setfield(state, -2, "__index");
-            push(state, +newindex);
+            push(state, +field_set);
             lua_setfield(state, -2, "__newindex");
             push(state, +gc);
             lua_setfield(state, -2, "__gc");
-            lua_setglobal(m_state, get_metatable_name<Class>());
+
+            for(auto& fun : m_function_injectors) {
+                fun.second->inject(state);
+                lua_setfield(state, -2, fun.first.c_str());
+            }
+            for(auto& prop: m_field_injectors) {
+                prop.second->inject(state);
+                luaL_newmetatable(state, get_metatable_name<lua_field>());
+                lua_setmetatable(state, -2);
+                lua_setfield(state, -2, prop.first.c_str());
+            }
+            lua_setglobal(state, get_metatable_name<Class>());
         }
 
-        template<typename... Args>
-        binder& with_constructor() {
-            auto constructor = [](lua_State* state) {
-                auto** address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class*)));
-                auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
-                info->is_created_in_lua = true;
-                lua_setuservalue(state, -2);
-                *address = constructor_helper<Class, Args...>(state, std::index_sequence_for<Args...>{});
-                luaL_setmetatable(state, get_metatable_name<Class>());
-                return 1;
-            };
-            push(m_state, +constructor);
-            lua_setglobal(m_state, m_name.c_str());
-            return *this;
-        }
 
-        binder& bind(std::string_view obj_name, Class* instance) {
-            auto** address = reinterpret_cast<Class**>(lua_newuserdata(m_state, sizeof(Class*)));
-            *address = instance;
-            auto* info = reinterpret_cast<lua_object_info*>(lua_newuserdata(m_state, sizeof(lua_object_info)));
-            info->is_created_in_lua = false;
-            lua_setuservalue(m_state, -2);
-            luaL_setmetatable(m_state, get_metatable_name<Class>());
-            lua_setglobal(m_state, obj_name.data());
-            return *this;
-        }
+        void bind(Class* instance, lua_State* state) {
+            auto** instance_address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class**)));
+            *instance_address = instance;
 
-        template<typename Return, typename... Args>
-        binder& with_method(const std::string& method_name, Return (Class::*method)(Args...)) {
-            using function_type = Return (Class::*)(Args...);
+            // 1. Bind correct metatable
+            luaL_newmetatable(state, get_metatable_name<Class>());
+            lua_setmetatable(state, -2);
 
-            lua_getglobal(m_state, get_metatable_name<Class>());
-            const static auto method_field_name = "original_method";
-            auto* data_store = reinterpret_cast<function_type*>(lua_newuserdata(m_state, sizeof(function_type)));
-            *data_store = method;
-            auto fun = [](lua_State* state) {
-                int last_arg = -static_cast<int>(sizeof...(Args));
-                auto* instance = *reinterpret_cast<Class**>(lua_touserdata(state, last_arg - 1));
-                auto function = *reinterpret_cast<function_type*>(lua_touserdata(state, last_arg - 2));
-                return do_call(state, instance, function, std::index_sequence_for<Args...>{});
-            };
-
-            lua_newtable(m_state);
-            lua_pushcfunction(m_state, fun);
-            lua_setfield(m_state, -2, "__call");
-            lua_setmetatable(m_state, -2);
-            lua_setfield(m_state, -2, method_name.c_str());
-            lua_pop(m_state, 1);
-            return *this;
-        }
-        template<typename Return, typename... Args>
-        binder& with_method(const std::string& method_name, Return (Class::*method)(Args...) const) {
-            using function_type = Return (Class::*)(Args...) const;
-
-            lua_getglobal(m_state, get_metatable_name<Class>());
-            const static auto method_field_name = "original_method";
-            auto* data_store = reinterpret_cast<function_type*>(lua_newuserdata(m_state, sizeof(function_type)));
-            *data_store = method;
-            auto fun = [](lua_State* state) {
-                int last_arg = -static_cast<int>(sizeof...(Args));
-                auto* instance = *reinterpret_cast<Class**>(lua_touserdata(state, last_arg - 1));
-                auto function = *reinterpret_cast<function_type*>(lua_touserdata(state, last_arg - 2));
-                return do_call(state, instance, function, std::index_sequence_for<Args...>{});
-            };
-
-            lua_newtable(m_state);
-            lua_pushcfunction(m_state, fun);
-            lua_setfield(m_state, -2, "__call");
-            lua_setmetatable(m_state, -2);
-            lua_setfield(m_state, -2, method_name.c_str());
-            lua_pop(m_state, 1);
-            return *this;
-        }
-
-        binder& with_associated_function(const std::string& function_name, lua_CFunction function) {
-            luaL_getmetatable(m_state, get_metatable_name<Class>());
-            push(m_state, function);
-            lua_setfield(m_state, -2, function_name.c_str());
-            lua_pop(m_state, 1); // Remove the metatable
-            return *this;
-        }
-        binder& with_custom_getter(const indexing_function& getter) {
-            lua_getglobal(m_state, get_metatable_name<Class>());
-            auto** fn_storage = reinterpret_cast<const indexing_function**>(lua_newuserdata(m_state, sizeof(indexing_function*)));
-            *fn_storage = &getter;
-            lua_setfield(m_state, -2, "custom_getter");
-            lua_pop(m_state, 1);
-            return *this;
-        }
-        binder& with_custom_setter(const indexing_function& setter) {
-            lua_getglobal(m_state, get_metatable_name<Class>());
-            auto** fn_storage = reinterpret_cast<const indexing_function**>(lua_newuserdata(m_state, sizeof(indexing_function*)));
-            *fn_storage = &setter;
-            lua_setfield(m_state, -2, "custom_setter");
-            lua_pop(m_state, 1);
-            return *this;
-        }
-        template<typename PropType>
-        binder& with_property(const std::string& property_name, PropType Class::*prop, field_accessibility accessibility = field_accessibility::read_and_write) {
-            using prop_signature = PropType Class::*;
-            lua_getglobal(m_state, get_metatable_name<Class>());
-
-            auto* getter_storage = reinterpret_cast<lua_field**>(lua_newuserdata(m_state, sizeof(lua_field*)));
-            *getter_storage = make_field_for_class(prop, accessibility);
-            auto gc = [](lua_State* state) {
-                auto* getter_storage = *reinterpret_cast<lua_field**>(luaL_checkudata(state, -1, get_metatable_name<lua_field>()));
-                delete getter_storage;
-                return 0;
-            };
-
-            luaL_newmetatable(m_state, get_metatable_name<lua_field>());
-            push(m_state, +gc);
-            lua_setfield(m_state, -2, "__gc");
-            lua_setmetatable(m_state, -2);
-
-            lua_setfield(m_state, -2, property_name.c_str());
-            lua_pop(m_state, 1);
-            return *this;
+            // 2. Configure data for garbage collector
+            auto* instance_info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
+            instance_info->is_created_in_lua = true;
+            lua_setuservalue(state, -2);
         }
     };
 }
