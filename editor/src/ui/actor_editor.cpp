@@ -7,6 +7,7 @@
 #include "game_framework/component.h"
 #include "game_framework/components/component_repository.h"
 #include "game_framework/resources/texture_resource.h"
+#include "game_framework/resources/script_resource.h"
 
 #include "game_framework/actor.h"
 #include "game_framework/stage.h"
@@ -120,12 +121,22 @@ void draw_property(std::string_view prop_name, field *prop,
                     } else {
                         ImGui::Text("No valid texture");
                     }
-                }
-                ImGui::SameLine();
-                if(ImGui::Button("Change Resource"))  {
-                    auto resource_path = editor::dialogs::file_picker("Pick Resource", {"*.png", "*.jpg"}, ".", "Texture Resource", false);
-                    if(resource_path) {
-                        m_prop->set_from_string(m_comp.lock().get(), resource_path->string());
+                    ImGui::SameLine();
+                    if(ImGui::Button("Change Resource"))  {
+                        auto resource_path = editor::dialogs::file_picker("Pick Resource", {"*.jpg", "*.png"}, ".", "Lua script file", false);
+                        if(resource_path) {
+                            m_prop->set_from_string(m_comp.lock().get(), resource_path->string());
+                        }
+                    }
+                } else if(res.is_resource<game_framework::script_resource>()) {
+                    auto script_res = res.get<game_framework::script_resource>();
+                    ImGui::Text("Script source: %s", script_res.get_script_name().data());
+                    ImGui::SameLine();
+                    if(ImGui::Button("Change Resource"))  {
+                        auto resource_path = editor::dialogs::file_picker("Pick Resource", {"*.lua"}, ".", "Lua script file", false);
+                        if(resource_path) {
+                            m_prop->set_from_string(m_comp.lock().get(), resource_path->string());
+                        }
                     }
                 }
             }

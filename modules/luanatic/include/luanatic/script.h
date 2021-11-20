@@ -13,6 +13,8 @@
 #include <memory>
 #include <functional>
 
+#include <csetjmp>
+
 namespace luanatic {
     class script {
     struct private_tag {};
@@ -22,6 +24,11 @@ namespace luanatic {
         void log_error() const;
         template<typename... Args>
         int internal_call(std::string_view function_name, Args... args) {
+            jmp_buf buf;
+            if(setjmp(buf) != 0) {
+                // an error happened
+                return LUA_ERRERR;
+            }
             lua_getglobal(m_state, function_name.data());
             int _dummy[] = {0, (push(m_state, args), 0)...};
             return lua_pcall(m_state, sizeof...(Args), 1, 0);

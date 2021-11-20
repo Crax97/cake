@@ -37,7 +37,7 @@ namespace logging {
         };
 
     public:
-        explicit category(std::string category_name)
+        explicit category(std::string category_name) noexcept
             : m_category_name{std::move(category_name)} { }
 
         message operator()(severity sev = severity::info);

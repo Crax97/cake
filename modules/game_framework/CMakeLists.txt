@@ -8,16 +8,20 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/rendering_world.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/component_repository.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/rendering_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/components/sprite_component.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/components/script_component.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/texture_loader.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/stage_serializer.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/loaders/stage_deserializer.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/resources/texture_resource.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/resources/script_resource.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/game.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/actor.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/stage.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/transform.cpp
-        src/loaders/miku_tokenizer.cpp src/loaders/actor_loader.cpp include/game_framework/loaders/actor_loader.h src/loaders/actor_deserializer.cpp include/game_framework/loaders/actor_deserializer.h)
+        src/loaders/miku_tokenizer.cpp
+        src/loaders/actor_loader.cpp
+        src/loaders/actor_deserializer.cpp)
 add_library(gameframework STATIC ${GAMEFRAMEWORK_SOURCES})
 target_include_directories(gameframework PUBLIC 
 ${GAMEFRAMEWORK_INCLUDE_DIRS} 
@@ -26,6 +30,6 @@ ${GAMEFRAMEWORK_INCLUDE_DIRS}
     ${RENDERER_EXPORTED_DIRS} 
     ${STB_HEADERS_DIR}
 )
-target_link_libraries(gameframework graphics_api renderer application core loglib)
+target_link_libraries(gameframework graphics_api renderer application luanatic filesystem core loglib)
 
 set(GAMEFRAMEWORK_EXPORTED_DIRS ${GAMEFRAMEWORK_INCLUDE_DIRS} PARENT_SCOPE)

@@ -6,6 +6,7 @@
 
 #include "game_framework/components/component_repository.h"
 #include "game_framework/components/sprite_component.h"
+#include "game_framework/components/script_component.h"
 
 #include "logging/logger.h"
 
@@ -16,7 +17,9 @@ static logging::category core("core");
 gameframework::game *g_game{nullptr};
 
 using sprite_component = gameframework::sprite_component;
+using script_component = gameframework::script_component;
 DEFINE_COMPONENT_REGISTRATOR(sprite_component)
+DEFINE_COMPONENT_REGISTRATOR(script_component)
 
 gameframework::game::game(int argc, char **argv)
     : app_framework::application(argc, argv) {
