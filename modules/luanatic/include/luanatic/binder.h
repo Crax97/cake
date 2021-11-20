@@ -106,7 +106,8 @@ namespace luanatic {
 
             void inject(lua_State *state) override {
                 auto caller = [](lua_State *state) {
-                    auto* instance = get_self<Class>(state);
+                    int self_addr = lua_gettop(state) - sizeof...(Args);
+                    auto* instance = get_self<Class>(state, self_addr);
                     fn_sig function = *reinterpret_cast<fn_sig *>(lua_touserdata(state, 1));
                     return do_call( state, instance, function, std::index_sequence_for < Args... > {});
                 };
@@ -133,13 +134,15 @@ namespace luanatic {
 
             void inject(lua_State *state) override {
                 auto caller = [](lua_State *state) {
-                    auto* instance = get_self<Class>(state);
-                    fn_sig function = *reinterpret_cast<fn_sig *>(lua_touserdata(state, 1));
+                    int self_addr = lua_gettop(state) - sizeof...(Args);
+                    auto* instance = get_self<Class>(state, self_addr);
+                    fn_sig function = *reinterpret_cast<fn_sig *>(luaL_testudata(state, 1, get_metatable_name<fn_sig>()));
                     return do_call( state, instance, function, std::index_sequence_for < Args... > {});
                 };
                 auto *address = reinterpret_cast<fn_sig *>(lua_newuserdata(state, sizeof(fn_sig)));
                 *address = m_method;
-                lua_newtable(state);
+
+                luaL_newmetatable(state, get_metatable_name<fn_sig>());
                 lua_pushcfunction(state, +caller);
                 lua_setfield(state, -2, "__call");
                 lua_setmetatable(state, -2);
@@ -225,16 +228,17 @@ namespace luanatic {
                 auto field_name = get<std::string>(state, 2);
                 lua_getmetatable(state, 1);
                 if(lua_getfield(state, -1, field_name.c_str()) == 0) {
-                    lua_pop(state, 1);
+                    lua_pop(state, 2);
                     lua_pushnil(state);
                     return 1;
                 }
                 if(void* data = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
                     lua_field* field = *reinterpret_cast<lua_field**>(data);
-                    lua_pop(state, 1);
+                    lua_pop(state, 3);
                     field->get(instance, state);
+                } else {
+                    lua_replace(state, -2);
                 }
-                lua_pop(state, 1);
                 return 1;
             };
 
