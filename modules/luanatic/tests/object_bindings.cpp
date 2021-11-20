@@ -149,7 +149,6 @@ TEST_CASE("Testing object bindings", "Object")  {
         test_binder.inject(script->get_state());
         auto call_result = script->call<int>("test");
     }
-#if 0
     SECTION("Additional getter/setter") {
         auto src = R"(
     function test()
@@ -163,26 +162,27 @@ TEST_CASE("Testing object bindings", "Object")  {
         REQUIRE(compiled_script.has_value());
         auto& script = compiled_script.value();
         MyTestClass instance {};
-        auto test_binder = luanatic::binder<MyTestClass>("MyTestClass", script->get_state())
-                .with_constructor<float, int>()
+        auto test_binder = luanatic::class_builder<MyTestClass>()
                 .with_method("sum_with_x", &MyTestClass::sum_with_x)
-                .with_custom_getter(+[](lua_State* state, std::string_view what) {
+                .with_custom_getter([](lua_State* state, std::string_view what) {
                     luanatic::push(state, what);
-                    return 1;
+                    return true;
                 })
                 .with_custom_setter([&number](lua_State* state, std::string_view what){
                     if(what == "param_to_custom_indexer") {
                         number = luanatic::get<int>(state);
+                        return true;
                     }
-                    return 0;
-                })
-                .bind("obj", &instance);
+                    return false;
+                });
+        test_binder.inject(script->get_state());
+
+        test_binder.bind("obj", &instance, script->get_state());
         auto call_result = script->call<std::string>("test");
         REQUIRE(call_result.has_value());
         REQUIRE(call_result.value() == "param_from_custom_indexer");
         REQUIRE(number == 84);
     }
-#endif
 
     SECTION("Everything together") {
         auto src = R"(

@@ -55,7 +55,18 @@ namespace luanatic {
         bool is_created_in_lua{};
         bool was_destroyed = false;
     };
-    using indexing_function = std::function<int(lua_State*, std::string_view)>;
+    using indexing_function = std::function<bool(lua_State*, std::string_view)>;
+
+    bool index_noop(lua_State*, std::string_view) {
+        return false;
+    }
+    struct class_info {
+        indexing_function set = &index_noop;
+        indexing_function get = &index_noop;
+
+        class_info()
+            : get(&index_noop), set(&index_noop) {}
+    };
 
     int try_call_custom_setter(lua_State* state, std::string_view field_name) {
         if(luaL_getmetafield(state, 1, "custom_setter")) {
@@ -184,6 +195,8 @@ namespace luanatic {
         std::unordered_map<std::string, std::unique_ptr<injector>> m_function_injectors {};
         std::unordered_map<std::string, std::unique_ptr<injector>> m_field_injectors {};
 
+        class_info infos;
+
     public:
         class_builder() = default;
 
@@ -222,14 +235,29 @@ namespace luanatic {
             return std::move(*this);
         }
 
+        class_builder<Class>&& with_custom_getter(const indexing_function& fn) {
+            infos.get = fn;
+            return std::move(*this);
+        }
+
+        class_builder<Class>&& with_custom_setter(const indexing_function& fn) {
+            infos.set = fn;
+            return std::move(*this);
+        }
+
         void inject(lua_State* state) {
             auto field_get = [](lua_State* state) {
                 auto* instance = get_self<Class>(state);
                 auto field_name = get<std::string>(state, 2);
                 lua_getmetatable(state, 1);
                 if(lua_getfield(state, -1, field_name.c_str()) == 0) {
-                    lua_pop(state, 2);
-                    lua_pushnil(state);
+                    lua_pop(state, 1);
+                    lua_getfield(state, -1, "class_info");
+                    auto* my_infos = reinterpret_cast<class_info*>(lua_touserdata(state, -1));
+                    lua_pop(state, 3);
+                    if(!my_infos->get(state, field_name)) {
+                        lua_pushnil(state);
+                    }
                     return 1;
                 }
                 if(void* data = luaL_testudata(state, -1, get_metatable_name<lua_field>())) {
@@ -254,7 +282,12 @@ namespace luanatic {
                     }
                 } else {
                     lua_pop(state, 1);
-                    lua_rawset(state, -3);
+                    lua_getfield(state, -1, "class_info");
+                    auto* my_infos = reinterpret_cast<class_info*>(lua_touserdata(state, -1));
+                    lua_pop(state, 2);
+                    if(!my_infos->set(state, field_name)) {
+                        lua_rawset(state, -3);
+                    }
                 }
                 return 0;
             };
@@ -289,11 +322,17 @@ namespace luanatic {
                 lua_setmetatable(state, -2);
                 lua_setfield(state, -2, prop.first.c_str());
             }
+
+            auto* info = reinterpret_cast<class_info*>(lua_newuserdata(state, sizeof(class_info)));
+            new (info) class_info();
+            *info = infos;
+            lua_setfield(state, -2, "class_info");
+
             lua_setglobal(state, get_metatable_name<Class>());
         }
 
 
-        void bind(Class* instance, lua_State* state) {
+        void bind(std::string_view name, Class* instance, lua_State* state) {
             auto** instance_address = reinterpret_cast<Class**>(lua_newuserdata(state, sizeof(Class**)));
             *instance_address = instance;
 
@@ -303,8 +342,10 @@ namespace luanatic {
 
             // 2. Configure data for garbage collector
             auto* instance_info = reinterpret_cast<lua_object_info*>(lua_newuserdata(state, sizeof(lua_object_info)));
-            instance_info->is_created_in_lua = true;
+            instance_info->is_created_in_lua = false;
             lua_setuservalue(state, -2);
+
+            lua_setglobal(state, name.data());
         }
     };
 }
